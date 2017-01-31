@@ -1,4 +1,4 @@
-# KDE Connect Chrome Extension
+# KDE Connect Chrome Extension ![License-MIT](http://img.shields.io/badge/license-MIT-red.svg)
 
 A Chrome (and compatible) browser extension to send pages and content from your
 browser to connected KDE Connect devices, via browser action or context menu.
