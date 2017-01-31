@@ -1,0 +1,56 @@
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+#container {
+  display: flex;
+  flex-direction: column;
+}
+
+#header {
+  display: flex;
+  align-items: center;
+  border-bottom: solid lightgray 1px;
+  white-space: nowrap;
+}
+
+#header > img {
+  padding: 8px;
+}
+
+#header > h1 {
+  color: #333;
+  font-size: 120%;
+  font-weight: normal;
+  margin: 0;
+  padding: 14px 17px 14px 0;
+  text-shadow: white 0 1px 2px;
+}
+
+#devices {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+button {
+  margin-left: 16px;
+}
+
+small {
+  text-align: center;
+}
+
+.device {
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+}
+
+.status-icon {
+  width: 24px;
+  height: 24px;
+  margin: 8px;
+}

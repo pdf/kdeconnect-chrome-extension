@@ -1,0 +1,32 @@
+body {
+  padding: 8px;
+}
+
+.item {
+  padding: 8px 0;
+}
+
+#container {
+  display: flex;
+  flex-direction: column;
+}
+
+#options {
+  display: flex;
+  flex-direction: column;
+  flex: auto 1 1;
+}
+
+#controls {
+  display: flex;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px;
+}
+
+#status {
+  flex: auto 1 1;
+  color: rgba(16, 145, 16, 0.79);
+}

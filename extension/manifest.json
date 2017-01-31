@@ -1,0 +1,45 @@
+{
+  "manifest_version": 2,
+
+  "name": "KDE Connect",
+  "short_name": "kdeconnect",
+  "description": "Allows sharing pages, videos, and images from your browser to KDE Connect devices.",
+  "version": "0.0.1",
+  "homepage_url": "https://github.com/pdf/com.0xc0dedbad.kdeconnect_chrome",
+
+  "browser_action": {
+    "default_name": "KDE Connect",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "256": "images/kdeconnect-256.png",
+      "128": "images/kdeconnect-128.png",
+      "64": "images/kdeconnect-64.png",
+      "48": "images/kdeconnect-48.png",
+      "32": "images/kdeconnect-32.png",
+      "22": "images/kdeconnect-22.png",
+      "16": "images/kdeconnect-16.png"
+    }
+  },
+  "options_ui": {
+    "page": "options.html",
+    "chrome_style": true
+  },
+  "background": {
+    "page": "background.html"
+  },
+  "permissions": [
+    "nativeMessaging",
+    "storage",
+    "tabs",
+    "contextMenus"
+  ],
+  "icons": {
+    "256": "images/kdeconnect-256.png",
+    "128": "images/kdeconnect-128.png",
+    "64": "images/kdeconnect-64.png",
+    "48": "images/kdeconnect-48.png",
+    "32": "images/kdeconnect-32.png",
+    "22": "images/kdeconnect-22.png",
+    "16": "images/kdeconnect-16.png"
+  }
+}

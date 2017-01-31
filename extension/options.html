@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>KDE Connect Options</title>
+    <link rel="stylesheet" href="css/options.css">
+  </head>
+  <body>
+    <div id="container">
+      <div id="options">
+        <div class="item">
+          <label for="defaultOnly">
+            <input id="defaultOnly" type="checkbox">
+            Send directly to default device, disable menus
+          </label>
+        </div>
+        <div id="defaultDeviceContainer" style="display: none;" class="item">
+          <label for="defaultDevice">
+            Default device:
+            <select id="defaultDevice"></select>
+          </label>
+        </div>
+      </div>
+      <div id="controls">
+        <div id="status" class="item">&nbsp;</div>
+        <button id="save">Save</button>
+      </div>
+    </div>
+
+    <script src="js/options.js"></script>
+  </body>
+</html>
