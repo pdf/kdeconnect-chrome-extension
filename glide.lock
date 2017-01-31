@@ -1,0 +1,20 @@
+hash: e698aedbe06ce6b6bc35805c9e320fce0ed9326e3be21e4efa13a0d69916b449
+updated: 2017-01-31T16:51:35.608261353+11:00
+imports:
+- name: github.com/buger/goterm
+  version: cc3942e537b1ab00de92d348c40acbfa6565d20f
+- name: github.com/godbus/dbus
+  version: 5f6efc7ef2759c81b7ba876593971bfce311eab3
+  subpackages:
+  - introspect
+- name: github.com/paulrademacher/climenu
+  version: a1afbb4e378bf580e7d6bddd826e44e8f64347a1
+- name: github.com/pkg/term
+  version: b1f72af2d63057363398bec5873d16a98b453312
+  subpackages:
+  - termios
+- name: golang.org/x/sys
+  version: d75a52659825e75fff6158388dddc6a5b04f9ba5
+  subpackages:
+  - unix
+testImports: []

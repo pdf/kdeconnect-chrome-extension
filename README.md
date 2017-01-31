@@ -31,3 +31,27 @@ Currently only Linux amd64 builds are produced, however please file an issue if
 you would like other operating systems or architectures, as the host should run
 anywhere.
 
+### Building the Host from source
+
+1. Install the [Go toolchain](https://golang.org) v1.7+
+2. Install [glide](https://github.com/Masterminds/glide):
+   ```bash
+   go get -u github.com/Masterminds/glide
+   ```
+3. Obtain the source:
+   ```bash
+   git clone https://github.com/pdf/kdeconnect-chrome-extension.git
+   cd kdeconnect-chrome-extension
+   ```
+4. Install dependecies:
+   ```bash
+   glide install
+   ```
+5. Install the binary:
+   ```bash
+   go install
+   ```
+
+You will find the binary in `${GOPATH}/bin/kdeconnect-chrome-extension` if
+`$GOPATH` is set, or `${HOME}/go/bin/kdeconnect-chrome-extension` for Go v1.8+
+without `$GOPATH`.
