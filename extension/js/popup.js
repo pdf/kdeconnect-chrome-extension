@@ -46,9 +46,9 @@ function writeDevices(devices) {
 
 function renderDevice(device) {
     var disabled = (!(device.isReachable && device.isTrusted)) ? 'disabled' : null;
-    var icon = device.statusIconName;
+    var icon = device.statusIconName || 'smartphone-connected';
     if (disabled) {
-        icon = device.iconName;
+        icon = device.iconName || 'smartphone-disconnected';
     }
     return '<div id="' + device.id + '" class="device"><img class="status-icon" src="images/' + icon + '.svg" /><span>' + device.name + '</span><button ' + disabled + ' data-target="' + device.id + '">Send</button></div>';
 }
