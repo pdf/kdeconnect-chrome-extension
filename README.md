@@ -25,7 +25,7 @@ extensions.
    sudo ./kdeconnect-chrome-extension -install
    ```
 4. Start your browser.
-5. Install the extension from the [Chome Web Store](https://chrome.google.com/webstore/detail/kdeconnect/ofmplbbfigookafjahpeepbggpofdhbo).
+5. Install the extension from the [Chome Web Store](https://chrome.google.com/webstore/detail/kde-connect/ofmplbbfigookafjahpeepbggpofdhbo).
 
 Currently only Linux amd64 builds are produced, however please file an issue if
 you would like other operating systems or architectures, as the host should run
