@@ -13,17 +13,21 @@ extensions.
 2. Close your browser
 3. Extract the host application anywhere, open a terminal and run the install
    command:
+
    ```bash
    ./kdeconnect-chrome-extension -install
    ```
+
    It will prompt you to select the browser you wish to install for, and deploy
    itself to the appropriate location.
 
    If you wish to deploy system-wide, rather than for the current user, simply
    run as root:
+
    ```bash
    sudo ./kdeconnect-chrome-extension -install
    ```
+
 4. Start your browser.
 5. Install the extension from the [Chome Web Store](https://chrome.google.com/webstore/detail/kde-connect/ofmplbbfigookafjahpeepbggpofdhbo).
 
@@ -35,19 +39,26 @@ anywhere.
 
 1. Install the [Go toolchain](https://golang.org) v1.7+
 2. Install [glide](https://github.com/Masterminds/glide):
+
    ```bash
    go get -u github.com/Masterminds/glide
    ```
+
 3. Obtain the source:
+
    ```bash
    git clone https://github.com/pdf/kdeconnect-chrome-extension.git
    cd kdeconnect-chrome-extension
    ```
+
 4. Install dependecies:
+
    ```bash
    glide install
    ```
+
 5. Install the binary:
+
    ```bash
    go install
    ```
