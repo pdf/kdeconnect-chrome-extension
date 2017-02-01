@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"runtime"
 
+	"github.com/kardianos/osext"
 	"github.com/paulrademacher/climenu"
 )
 
@@ -46,7 +47,11 @@ func doInstall(path, extensionID string) error {
 		return err
 	}
 
-	in, err := os.Open(os.Args[0])
+	exe, err := osext.Executable()
+	if err != nil {
+		return err
+	}
+	in, err := os.Open(exe)
 	defer func() {
 		if e := in.Close(); err != nil {
 			fmt.Println(e)

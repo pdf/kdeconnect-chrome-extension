@@ -1,5 +1,5 @@
-hash: e698aedbe06ce6b6bc35805c9e320fce0ed9326e3be21e4efa13a0d69916b449
-updated: 2017-01-31T16:51:35.608261353+11:00
+hash: f2c54622a6eda01f9fbbe148c8ce535676da4a9f2567fcf8b1988808ec6d0ff9
+updated: 2017-02-01T14:46:21.698000446+11:00
 imports:
 - name: github.com/buger/goterm
   version: cc3942e537b1ab00de92d348c40acbfa6565d20f
@@ -7,6 +7,8 @@ imports:
   version: 5f6efc7ef2759c81b7ba876593971bfce311eab3
   subpackages:
   - introspect
+- name: github.com/kardianos/osext
+  version: c2c54e542fb797ad986b31721e1baedf214ca413
 - name: github.com/paulrademacher/climenu
   version: a1afbb4e378bf580e7d6bddd826e44e8f64347a1
 - name: github.com/pkg/term

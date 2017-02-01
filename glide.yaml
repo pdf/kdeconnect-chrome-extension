@@ -5,3 +5,4 @@ import:
   subpackages:
   - introspect
 - package: github.com/paulrademacher/climenu
+- package: github.com/kardianos/osext
