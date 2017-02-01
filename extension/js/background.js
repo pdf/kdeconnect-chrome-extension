@@ -208,6 +208,7 @@ function resetReconnect() {
 
 function onDisconnect() {
     port = null;
+    setWarningBadge([255, 0, 0, 220]);
     // Disconnected, cancel back-off reset
     if (typeof reconnectResetTimer === 'number') {
         window.clearTimeout(reconnectResetTimer);
@@ -219,9 +220,11 @@ function onDisconnect() {
         reconnectTimer = null;
     }
 
-    var message = chrome.runtime.lastError.message;
+    var message;
+    if (chrome.runtime.lastError) {
+        message = chrome.runtime.lastError.message;
+    }
     console.warn('Disconnected from native host: ' + message);
-    setWarningBadge([255, 0, 0, 220]);
 
     // Exponential back-off on reconnect
     reconnectTimer = window.setTimeout(function() {
@@ -231,6 +234,7 @@ function onDisconnect() {
 }
 
 function connect() {
+    clearWarningBadge();
     port = chrome.runtime.connectNative(hostname);
     // Reset the back-off delay if we stay connected
     reconnectResetTimer = window.setTimeout(function() {
@@ -239,7 +243,6 @@ function connect() {
 
     port.onDisconnect.addListener(onDisconnect);
     port.onMessage.addListener(onMessage);
-    clearWarningBadge();
     port.postMessage({ type: 'typeDevices' });
 }
 
