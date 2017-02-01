@@ -3,6 +3,9 @@ var port = null;
 var defaultDeviceId = null;
 var defaultOnly = false;
 var knownDevices = {};
+var reconnectDelay = 100;
+var reconnectTimer = null;
+var reconnectResetTimer = null;
 
 function toggleAction(tab, forced) {
     if (typeof tab.id !== 'number') {
@@ -86,7 +89,9 @@ function createContextMenus(devices) {
             setWarningBadge([255, 129, 0, 220]);
             return;
         }
-        clearWarningBadge();
+        if (port) {
+            clearWarningBadge();
+        }
 
         if (keys.length === 1) {
             var key = keys[0];
@@ -197,16 +202,41 @@ function onMessage(msg) {
     }
 }
 
+function resetReconnect() {
+    reconnectDelay = 100;
+}
+
 function onDisconnect() {
     port = null;
+    // Disconnected, cancel back-off reset
+    if (typeof reconnectResetTimer === 'number') {
+        window.clearTimeout(reconnectResetTimer);
+        reconnectResetTimer = null;
+    }
+    // Don't queue more than one reconnect
+    if (typeof reconnectTimer === 'number') {
+        window.clearTimeout(reconnectTimer);
+        reconnectTimer = null;
+    }
+
     var message = chrome.runtime.lastError.message;
     console.warn('Disconnected from native host: ' + message);
     setWarningBadge([255, 0, 0, 220]);
-    connect();
+
+    // Exponential back-off on reconnect
+    reconnectTimer = window.setTimeout(function() {
+        connect();
+    }, reconnectDelay)
+    reconnectDelay = reconnectDelay * 2
 }
 
 function connect() {
     port = chrome.runtime.connectNative(hostname);
+    // Reset the back-off delay if we stay connected
+    reconnectResetTimer = window.setTimeout(function() {
+        reconnectDelay = 100;
+    }, reconnectDelay * 0.9);
+
     port.onDisconnect.addListener(onDisconnect);
     port.onMessage.addListener(onMessage);
     clearWarningBadge();
