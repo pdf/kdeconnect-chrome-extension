@@ -32,7 +32,7 @@ function sendMessage(msg) {
 }
 
 function onRuntimeMessage(msg, sender, sendResponse) {
-    if (sender.url === 'chrome-extension://ofmplbbfigookafjahpeepbggpofdhbo/background.html') {
+    if (sender.url === 'chrome-extension://' + chrome.runtime.id + '/background.html') {
         // Ignore locally generated messages
         return;
     }

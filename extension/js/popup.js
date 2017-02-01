@@ -81,7 +81,7 @@ function fetchDevices() {
 }
 
 function onMessage(msg, sender, sendResponse) {
-    if (sender.url !== 'chrome-extension://ofmplbbfigookafjahpeepbggpofdhbo/background.html') {
+    if (sender.url !== 'chrome-extension://' + chrome.runtime.id + '/background.html') {
         // Messages flow one-way
         return;
     }

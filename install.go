@@ -13,8 +13,9 @@ import (
 )
 
 const (
-	def     = `default`
-	appName = `com.0xc0dedbad.kdeconnect_chrome`
+	def                = `default`
+	appName            = `com.0xc0dedbad.kdeconnect_chrome`
+	defaultExtensionID = `ofmplbbfigookafjahpeepbggpofdhbo`
 )
 
 var (
@@ -24,7 +25,7 @@ var (
   "path": "{{.Path}}",
   "type": "stdio",
   "allowed_origins": [
-    "chrome-extension://ofmplbbfigookafjahpeepbggpofdhbo/"
+    "chrome-extension://{{.ExtensionID}}/"
   ]
 }`))
 
@@ -33,10 +34,11 @@ var (
 )
 
 type manifest struct {
-	Path string
+	Path        string
+	ExtensionID string
 }
 
-func doInstall(path string) error {
+func doInstall(path, extensionID string) error {
 	daemonPath := filepath.Join(path, appName)
 	templatePath := filepath.Join(path, fmt.Sprintf("%s.json", appName))
 
@@ -80,7 +82,10 @@ func doInstall(path string) error {
 		return err
 	}
 	//fmt.Println(`Writing template`, templatePath)
-	if err = manifestTemplate.Execute(man, manifest{daemonPath}); err != nil {
+	if err = manifestTemplate.Execute(man, manifest{
+		Path:        daemonPath,
+		ExtensionID: extensionID,
+	}); err != nil {
 		return err
 	}
 
@@ -180,6 +185,11 @@ func install() error {
 		selection = append(selection, response)
 	}
 
+	var extensionID string
+	for extensionID == `` {
+		extensionID = climenu.GetText(`Extension ID (Enter accepts default)`, defaultExtensionID)
+	}
+
 	for _, s := range selection {
 		if s == `custom` {
 			continue
@@ -189,7 +199,7 @@ func install() error {
 			// custom path
 			path = s
 		}
-		if err := doInstall(path); err != nil {
+		if err := doInstall(path, extensionID); err != nil {
 			return err
 		}
 	}
