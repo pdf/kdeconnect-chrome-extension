@@ -4,7 +4,7 @@
   "name": "KDE Connect",
   "short_name": "kdeconnect",
   "description": "Allows sharing pages, videos, and images from your browser to KDE Connect devices.",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "homepage_url": "https://github.com/pdf/com.0xc0dedbad.kdeconnect_chrome",
 
   "browser_action": {
