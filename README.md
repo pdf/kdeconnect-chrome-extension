@@ -18,8 +18,12 @@ extensions.
    ./kdeconnect-chrome-extension -install
    ```
 
-   It will prompt you to select the browser you wish to install for, and deploy
-   itself to the appropriate location.
+   It will prompt you to select the browser you wish to install for, use `Space`
+   to select your browser(s), and `Enter` to accept. The installer will deploy
+   itself to the appropriate location for the selected browser.
+
+   When prompted for the extension ID, just hit `Enter` to continue, unless you
+   are a developer.
 
    If you wish to deploy system-wide, rather than for the current user, simply
    run as root:
@@ -50,8 +54,12 @@ If you are prompted to upgrade the host application, follow these instructions.
    ./kdeconnect-chrome-extension -install
    ```
 
-   It will prompt you to select the browser you wish to install for, and deploy
-   itself to the appropriate location.
+   It will prompt you to select the browser you wish to install for, use `Space`
+   to select your browser(s), and `Enter` to accept. The installer will deploy
+   itself to the appropriate location for the selected browser.
+
+   When prompted for the extension ID, just hit `Enter` to continue, unless you
+   are a developer.
 
    If you wish to deploy system-wide, rather than for the current user, simply
    run as root:
