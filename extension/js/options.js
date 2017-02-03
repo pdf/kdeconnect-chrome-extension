@@ -8,7 +8,7 @@ function writeDevices(devices) {
         var dev = devices[key];
         var disabled = (!(dev.isReachable || dev.isTrusted)) ? 'disabled' : null;
         var selected = defaultDeviceId == dev.id ? 'selected' : null;
-        devNode.innerHTML += '<option value="' + dev.id + '" ' + disabled + ' ' + selected + '>' + dev.name + '</option>'
+        devNode.innerHTML += '<option value="' + dev.id + '" ' + disabled + ' ' + selected + '>' + dev.name + '</option>';
     });
 }
 
@@ -25,10 +25,10 @@ function saveOptions() {
         defaultOnly: newDefaultOnly,
     }, function() {
         var status = document.getElementById('status');
-        status.textContent = 'Saved...'
+        status.textContent = 'Saved...';
         setTimeout(function() {
             status.innerHTML = '&nbsp;';
-        }, 750)
+        }, 750);
     });
 }
 
@@ -48,7 +48,7 @@ function restoreOptions() {
 
 function fetchDevices() {
     chrome.runtime.sendMessage({
-        type: 'typeDevices'
+        type: 'typeDevices',
     });
 }
 
@@ -62,7 +62,7 @@ function onMessage(msg, sender, sendResponse) {
             writeDevices(msg.data);
             break;
         default:
-            return
+            return;
     }
 }
 

@@ -12,7 +12,7 @@ function getCurrentTab(callback) {
 
 function sendUrlCallback(target, url) {
     return function() {
-        sendUrl(target, url)
+        sendUrl(target, url);
     }
 }
 
@@ -59,7 +59,7 @@ function attachDeviceListener(id) {
 
 function updateDeviceMarkup(device) {
     document.getElementById(device.id).replaceWith(renderDevice(device));
-    attachDeviceListener(device.id)
+    attachDeviceListener(device.id);
 }
 
 function updateDevice(device) {
@@ -76,7 +76,7 @@ function updateDevice(device) {
 
 function fetchDevices() {
     chrome.runtime.sendMessage({
-        type: 'typeDevices'
+        type: 'typeDevices',
     });
 }
 
@@ -94,7 +94,7 @@ function onMessage(msg, sender, sendResponse) {
             writeDevices(msg.data);
             break;
         default:
-            return
+            return;
     }
 }
 
@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (items.defaultOnly && items.defaultDeviceId) {
             getCurrentTab(function(tab) {
                 if (!tab) {
-                    console.warn('Missing tab?!')
+                    console.warn('Missing tab?!');
                     return;
                 }
                 currentUrl = tab.url;
@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function() {
         fetchDevices();
         getCurrentTab(function(tab) {
             if (!tab) {
-                console.warn('Missing tab?!')
+                console.warn('Missing tab?!');
                 return;
             }
             currentUrl = tab.url;

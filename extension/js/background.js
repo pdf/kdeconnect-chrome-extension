@@ -8,12 +8,16 @@ var reconnectTimer = null;
 var reconnectResetTimer = null;
 
 function toggleAction(tab, forced) {
+    if (!tab) {
+        console.error(`Missing tab for toggleAction`);
+        return;
+    }
     if (typeof tab.id !== 'number') {
-        console.error('tab.id should be number:', tab)
+        console.error('tab.id should be number:', tab);
         return;
     }
     if (typeof tab.url !== 'string') {
-        console.error('tab.url should be string:', tab)
+        console.error('tab.url should be string:', tab);
         return;
     }
 
@@ -26,7 +30,7 @@ function toggleAction(tab, forced) {
 
 function sendMessage(msg) {
     if (!port || !msg || !msg.type) {
-        console.error('Missing message parameters')
+        console.error('Missing message parameters');
     }
     port.postMessage(msg);
 }
@@ -62,7 +66,7 @@ function contextMenuHandler(info, tab) {
         type: 'typeShare',
         data: {
             target: info.menuItemId,
-            url: info.linkUrl || info.srcUrl || info.frameUrl || info.pageUrl
+            url: info.linkUrl || info.srcUrl || info.frameUrl || info.pageUrl,
         }
     });
 }
@@ -101,14 +105,14 @@ function createContextMenus(devices) {
                 enabled: devs[key].isReachable && devs[key].isTrusted,
                 contexts: ['page', 'frame', 'link', 'image', 'video', 'audio'],
                 onclick: contextMenuHandler,
-            })
+            });
             return;
         }
 
         chrome.contextMenus.create({
             id: 'kdeconnectRoot',
             title: 'KDE Connect',
-            contexts: ['page', 'frame', 'link', 'image', 'video', 'audio']
+            contexts: ['page', 'frame', 'link', 'image', 'video', 'audio'],
         });
         Object.keys(devs).forEach(function(key) {
             chrome.contextMenus.create({
@@ -131,7 +135,7 @@ function updateContextMenu(device) {
 }
 
 function updateDevice(device) {
-    var known = knownDevices[device.id]
+    var known = knownDevices[device.id];
     knownDevices[device.id] = device;
     if (known) {
         // TODO: Sort out dynamic updates, maybe not until I pull in a framework
@@ -177,10 +181,10 @@ function restoreOptions() {
     }, function(items) {
         onStorageChanged({
             defaultDeviceId: {
-                newValue: items.defaultDeviceId
+                newValue: items.defaultDeviceId,
             },
             defaultOnly: {
-                newValue: items.defaultOnly
+                newValue: items.defaultOnly,
             }
         }, 'sync');
     });
@@ -229,8 +233,8 @@ function onDisconnect() {
     // Exponential back-off on reconnect
     reconnectTimer = window.setTimeout(function() {
         connect();
-    }, reconnectDelay)
-    reconnectDelay = reconnectDelay * 2
+    }, reconnectDelay);
+    reconnectDelay = reconnectDelay * 2;
 }
 
 function connect() {
