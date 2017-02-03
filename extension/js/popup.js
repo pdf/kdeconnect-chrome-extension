@@ -44,6 +44,17 @@ function writeDevices(devices) {
     });
 }
 
+function writeStatus(details) {
+    var devNode = document.getElementById('status');
+    if (!details) {
+        devNode.innerHTML = '';
+        return;
+    }
+    if (details.update) {
+        devNode.innerHTML = '<p class="status">A host upgrade v' + details.update + ' is available, please follow the <a target="_blank" href="https://github.com/pdf/kdeconnect-chrome-extension#upgrading">upgrade instructions</a>.</p>'
+    }
+}
+
 function renderDevice(device) {
     var disabled = (!(device.isReachable && device.isTrusted)) ? 'disabled' : null;
     var icon = device.statusIconName || 'smartphone-connected';
@@ -70,13 +81,19 @@ function updateDevice(device) {
         // updateDeviceMarkup(device);
         writeDevices(knownDevices);
     } else {
-        writeDevices(knownDevices);
+        fetchDevices();
     }
 }
 
 function fetchDevices() {
     chrome.runtime.sendMessage({
         type: 'typeDevices',
+    });
+}
+
+function fetchVersion() {
+    chrome.runtime.sendMessage({
+        type: 'typeVersion',
     });
 }
 
@@ -93,6 +110,13 @@ function onMessage(msg, sender, sendResponse) {
             knownDevices = msg.data;
             writeDevices(msg.data);
             break;
+        case 'typeVersion':
+            var version = chrome.runtime.getManifest().version;
+            if (msg.data != version) {
+                writeStatus({ update: version });
+            } else {
+                writeStatus();
+            }
         default:
             return;
     }
@@ -114,6 +138,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             return;
         }
+        fetchVersion();
         fetchDevices();
         getCurrentTab(function(tab) {
             if (!tab) {

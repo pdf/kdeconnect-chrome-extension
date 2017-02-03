@@ -5,9 +5,9 @@ package main
 import "fmt"
 import "encoding/json"
 
-const _messageType_name = "typeDevicestypeSharetypeDeviceUpdatetypeError"
+const _messageType_name = "typeDevicestypeSharetypeDeviceUpdatetypeErrortypeVersion"
 
-var _messageType_index = [...]uint8{0, 11, 20, 36, 45}
+var _messageType_index = [...]uint8{0, 11, 20, 36, 45, 56}
 
 func (i messageType) String() string {
 	if i < 0 || i >= messageType(len(_messageType_index)-1) {
@@ -21,6 +21,7 @@ var _messageTypeNameToValue_map = map[string]messageType{
 	_messageType_name[11:20]: 1,
 	_messageType_name[20:36]: 2,
 	_messageType_name[36:45]: 3,
+	_messageType_name[45:56]: 4,
 }
 
 func messageTypeString(s string) (messageType, error) {

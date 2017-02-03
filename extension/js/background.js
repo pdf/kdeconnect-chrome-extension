@@ -6,6 +6,7 @@ var knownDevices = {};
 var reconnectDelay = 100;
 var reconnectTimer = null;
 var reconnectResetTimer = null;
+var updatePending = null;
 
 function toggleAction(tab, forced) {
     if (!tab) {
@@ -43,16 +44,16 @@ function onRuntimeMessage(msg, sender, sendResponse) {
     sendMessage(msg);
 }
 
-function setWarningBadge(color) {
-    chrome.browserAction.getBadgeText({}, function(text) {
-        if (text !== '!') {
-            chrome.browserAction.setBadgeText({ text: '!' });
+function setBadge(text, color) {
+    chrome.browserAction.getBadgeText({}, function(oldText) {
+        if (oldText !== text) {
+            chrome.browserAction.setBadgeText({ text: text });
             chrome.browserAction.setBadgeBackgroundColor({ color: color });
         }
     });
 }
 
-function clearWarningBadge() {
+function clearBadge() {
     chrome.browserAction.getBadgeText({}, function(text) {
         if (text !== '') {
             chrome.browserAction.setBadgeText({ text: '' });
@@ -87,14 +88,14 @@ function createContextMenus(devices) {
             }
         });
         if (!active) {
-            setWarningBadge([255, 129, 0, 220]);
+            setBadge('!', [255, 129, 0, 220]);
             return;
         }
         if (keys.length === 0) {
             return;
         }
-        if (port) {
-            clearWarningBadge();
+        if (port && !updatePending) {
+            clearBadge();
         }
 
         if (keys.length === 1) {
@@ -201,6 +202,18 @@ function onMessage(msg) {
             createContextMenus(msg.data);
             chrome.runtime.sendMessage(msg);
             break;
+        case 'typeVersion':
+            var version = chrome.runtime.getManifest().version;
+            if (msg.data != version) {
+                updatePending = version;
+                setBadge('!', [0, 116, 255, 220]);
+            } else {
+                updatePending = null;
+                if (port) {
+                    clearBadge();
+                }
+            }
+            chrome.runtime.sendMessage(msg);
         default:
             chrome.runtime.sendMessage(msg);
     }
@@ -212,7 +225,7 @@ function resetReconnect() {
 
 function onDisconnect() {
     port = null;
-    setWarningBadge([255, 0, 0, 220]);
+    setBadge('!', [255, 0, 0, 220]);
     // Disconnected, cancel back-off reset
     if (typeof reconnectResetTimer === 'number') {
         window.clearTimeout(reconnectResetTimer);
@@ -238,7 +251,7 @@ function onDisconnect() {
 }
 
 function connect() {
-    clearWarningBadge();
+    clearBadge();
     port = chrome.runtime.connectNative(hostname);
     // Reset the back-off delay if we stay connected
     reconnectResetTimer = window.setTimeout(function() {
@@ -247,6 +260,7 @@ function connect() {
 
     port.onDisconnect.addListener(onDisconnect);
     port.onMessage.addListener(onMessage);
+    port.postMessage({ type: 'typeVersion' });
     port.postMessage({ type: 'typeDevices' });
 }
 

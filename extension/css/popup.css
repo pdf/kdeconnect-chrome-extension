@@ -54,3 +54,8 @@ small {
   height: 24px;
   margin: 8px;
 }
+
+.status {
+  margin: 8px;
+  font-style: oblique;
+}
