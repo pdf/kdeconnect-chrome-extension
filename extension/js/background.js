@@ -79,9 +79,6 @@ function createContextMenus(devices) {
             devs[defaultDeviceId] = devices[defaultDeviceId];
         }
         var keys = Object.keys(devs);
-        if (keys.length === 0) {
-            return;
-        }
         var active = false;
         keys.forEach(function(key) {
             if (devs[key].isReachable && devs[key].isTrusted) {
@@ -91,6 +88,9 @@ function createContextMenus(devices) {
         });
         if (!active) {
             setWarningBadge([255, 129, 0, 220]);
+            return;
+        }
+        if (keys.length === 0) {
             return;
         }
         if (port) {
