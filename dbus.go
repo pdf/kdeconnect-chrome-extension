@@ -3,12 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 	"strings"
 	"sync"
 
 	"github.com/godbus/dbus"
-	"github.com/godbus/dbus/introspect"
 )
 
 const (
@@ -26,6 +24,7 @@ const (
 
 type deviceList struct {
 	devices map[string]*Device
+	conn    *dbus.Conn
 	sync.RWMutex
 }
 
@@ -66,7 +65,8 @@ func (d *deviceList) all() map[string]*Device {
 
 func (d *deviceList) Close() error {
 	var err error
-	for _, d := range devices.devices {
+	err = d.conn.Close()
+	for _, d := range d.devices {
 		if e := d.Close(); err != nil {
 			log(e)
 			if err == nil {
@@ -308,20 +308,21 @@ func (d *Device) Close() error {
 	return d.conn.Close()
 }
 
-func getDevices(conn *dbus.Conn) error {
+func (d *deviceList) getDevices() error {
 	var ids []string
 
-	obj := conn.Object(dest, path)
-	if err := obj.Call(`devices`, 0, true, true).Store(&ids); err != nil {
+	obj := d.conn.Object(dest, path)
+	// Find known devices, include unreachable, but exclude unpaired
+	if err := obj.Call(`devices`, 0, false, true).Store(&ids); err != nil {
 		return err
 	}
 
 	for _, id := range ids {
 		var err error
-		if _, ok := devices.get(id); ok {
+		if _, ok := d.get(id); ok {
 			continue
 		}
-		err = devices.add(id)
+		err = d.add(id)
 		if err != nil {
 			log(err)
 			continue
@@ -358,27 +359,13 @@ func newDevice(id string) (*Device, error) {
 	return d, nil
 }
 
-func newDeviceList() *deviceList {
+func newDeviceList() (*deviceList, error) {
+	conn, err := dbus.SessionBus()
+	if err != nil {
+		return nil, err
+	}
 	return &deviceList{
 		devices: make(map[string]*Device),
-	}
-}
-
-// Debugging
-func introSpect(obj dbus.BusObject) error {
-	log(fmt.Errorf("starting introspection: %+v", obj))
-	node, err := introspect.Call(obj)
-	if err != nil {
-		return err
-	}
-
-	data, err := json.MarshalIndent(node, ``, `	`)
-	if err != nil {
-		return err
-	}
-	if _, err = os.Stderr.Write(data); err != nil {
-		return err
-	}
-
-	return nil
+		conn:    conn,
+	}, nil
 }

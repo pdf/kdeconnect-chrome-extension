@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-
-	"github.com/godbus/dbus"
 )
 
 const (
@@ -16,7 +14,7 @@ const (
 
 var (
 	messageQueue = make(chan *message, 10)
-	devices      = newDeviceList()
+	devices      *deviceList
 	installFlag  bool
 )
 
@@ -107,8 +105,14 @@ func log(err error) {
 }
 
 func init() {
+	var err error
+
 	flag.BoolVar(&installFlag, `install`, false, `Perform installation`)
 	flag.Parse()
+
+	if devices, err = newDeviceList(); err != nil {
+		panic(err)
+	}
 }
 
 func main() {
@@ -118,12 +122,8 @@ func main() {
 		}
 		os.Exit(0)
 	}
-	conn, err := dbus.SessionBus()
-	if err != nil {
-		panic(err)
-	}
 
-	if err = getDevices(conn); err != nil {
+	if err := devices.getDevices(); err != nil {
 		log(err)
 	}
 
