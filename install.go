@@ -176,9 +176,16 @@ func install() error {
 	menu.AddMenuItem(`Vivaldi`, `vivaldi`)
 	menu.AddMenuItem(`Custom`, `custom`)
 
-	selection, escaped := menu.Run()
-	if escaped {
-		os.Exit(1)
+	var (
+		selection = make([]string, 0)
+		escaped   bool
+	)
+
+	for len(selection) == 0 {
+		selection, escaped = menu.Run()
+		if escaped {
+			os.Exit(1)
+		}
 	}
 
 	if hasCustom(selection) {
