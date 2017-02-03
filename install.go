@@ -170,7 +170,7 @@ func install() error {
 		},
 	}
 
-	menu := climenu.NewCheckboxMenu(`Browser Selection`, `Select browser(s) for native host installation`, `OK`, `Cancel`)
+	menu := climenu.NewCheckboxMenu(`Browser Selection`, `Select browser(s) for native host installation (Space to select, Enter to confirm)`, `OK`, `Cancel`)
 	menu.AddMenuItem(`Chrome/Opera`, def)
 	menu.AddMenuItem(`Chromium`, `chromium`)
 	menu.AddMenuItem(`Vivaldi`, `vivaldi`)
