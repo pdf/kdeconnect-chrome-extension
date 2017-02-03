@@ -8,6 +8,12 @@ var reconnectTimer = null;
 var reconnectResetTimer = null;
 var updatePending = null;
 
+var badges = {};
+
+var red = [255, 0, 0, 220];
+var orange = [255, 129, 0, 220];
+var blue = [0, 116, 255, 220];
+
 function toggleAction(tab, forced) {
     if (!tab) {
         console.error(`Missing tab for toggleAction`);
@@ -41,25 +47,54 @@ function onRuntimeMessage(msg, sender, sendResponse) {
         // Ignore locally generated messages
         return;
     }
-    sendMessage(msg);
+    switch (msg.type) {
+        case 'typeVersion':
+            // TODO: Remove when missing typeVersion on host is considered unlikely
+            if (updatePending === null) {
+                chrome.runtime.sendMessage({ type: 'typeVersion', data: '0.0.0' });
+            }
+            sendMessage(msg);
+            break;
+        default:
+            sendMessage(msg);
+    }
 }
 
-function setBadge(text, color) {
-    chrome.browserAction.getBadgeText({}, function(oldText) {
-        if (oldText !== text) {
+function updateBadge(text, color) {
+    if (text === undefined || color === undefined) {
+        console.error('Missing params for updateBadge');
+        return;
+    }
+    chrome.browserAction.getBadgeBackgroundColor({}, function(oldColor) {
+        if (oldColor != color) {
             chrome.browserAction.setBadgeText({ text: text });
             chrome.browserAction.setBadgeBackgroundColor({ color: color });
+        } else {
+            chrome.browserAction.getBadgeText({}, function(oldText) {
+                if (oldText !== text) {
+                    chrome.browserAction.setBadgeText({ text: text });
+                    chrome.browserAction.setBadgeBackgroundColor({ color: color });
+                }
+            });
         }
     });
 }
 
-function clearBadge() {
-    chrome.browserAction.getBadgeText({}, function(text) {
-        if (text !== '') {
-            chrome.browserAction.setBadgeText({ text: '' });
-            chrome.browserAction.setBadgeBackgroundColor({ color: [0, 0, 0, 0] });
-        }
-    });
+function setBadge(source, text, color) {
+    badges[source] = { text: text, color: color };
+    updateBadge(text, color);
+}
+
+function clearBadge(source) {
+    delete(badges[source]);
+    var keys = Object.keys(badges);
+    if (keys.length === 0) {
+        updateBadge('', [0, 0, 0, 0]);
+        return;
+    }
+
+    var last = badges[keys[keys.length - 1]];
+    updateBadge(last.text, last.color);
 }
 
 function contextMenuHandler(info, tab) {
@@ -88,15 +123,13 @@ function createContextMenus(devices) {
             }
         });
         if (!active) {
-            setBadge('!', [255, 129, 0, 220]);
+            setBadge('active', '!', orange);
             return;
         }
         if (keys.length === 0) {
             return;
         }
-        if (port && !updatePending) {
-            clearBadge();
-        }
+        clearBadge('active');
 
         if (keys.length === 1) {
             var key = keys[0];
@@ -206,12 +239,10 @@ function onMessage(msg) {
             var version = chrome.runtime.getManifest().version;
             if (msg.data != version) {
                 updatePending = version;
-                setBadge('!', [0, 116, 255, 220]);
+                setBadge('update', '!', blue);
             } else {
-                updatePending = null;
-                if (port) {
-                    clearBadge();
-                }
+                updatePending = false;
+                clearBadge('update');
             }
             chrome.runtime.sendMessage(msg);
         default:
@@ -225,7 +256,7 @@ function resetReconnect() {
 
 function onDisconnect() {
     port = null;
-    setBadge('!', [255, 0, 0, 220]);
+    setBadge('connected', '!', red);
     // Disconnected, cancel back-off reset
     if (typeof reconnectResetTimer === 'number') {
         window.clearTimeout(reconnectResetTimer);
@@ -251,7 +282,7 @@ function onDisconnect() {
 }
 
 function connect() {
-    clearBadge();
+    clearBadge('connected');
     port = chrome.runtime.connectNative(hostname);
     // Reset the back-off delay if we stay connected
     reconnectResetTimer = window.setTimeout(function() {
@@ -261,6 +292,15 @@ function connect() {
     port.onDisconnect.addListener(onDisconnect);
     port.onMessage.addListener(onMessage);
     port.postMessage({ type: 'typeVersion' });
+    // TODO: Remove when missing typeVersion on host is considered unlikely
+    window.setTimeout(function() {
+        if (updatePending === null) {
+            // We did not receive a response to our typeUpdate message from the
+            // host
+            sendMessage({ type: 'typeError', data: '' });
+            setBadge('update', '!', red);
+        }
+    }, 1000)
     port.postMessage({ type: 'typeDevices' });
 }
 
