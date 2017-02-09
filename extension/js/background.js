@@ -13,6 +13,7 @@ var badges = {};
 var red = [255, 0, 0, 220];
 var orange = [255, 129, 0, 220];
 var blue = [0, 116, 255, 220];
+var lastHostVersion = '0.0.5';
 
 function toggleAction(tab, forced) {
     if (!tab) {
@@ -237,6 +238,9 @@ function onMessage(msg) {
             break;
         case 'typeVersion':
             var version = chrome.runtime.getManifest().version;
+            if (lastHostVersion) {
+                version = lastHostVersion;
+            }
             if (msg.data != version) {
                 updatePending = version;
                 setBadge('update', '!', blue);

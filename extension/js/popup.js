@@ -1,5 +1,6 @@
 var currentUrl = null;
 var knownDevices = {};
+var lastHostVersion = '0.0.5';
 
 function getCurrentTab(callback) {
     chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
@@ -112,6 +113,9 @@ function onMessage(msg, sender, sendResponse) {
             break;
         case 'typeVersion':
             var version = chrome.runtime.getManifest().version;
+            if (lastHostVersion) {
+                version = lastHostVersion;
+            }
             if (msg.data != version) {
                 writeStatus({ update: version });
             } else {
