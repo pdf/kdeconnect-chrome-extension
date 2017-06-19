@@ -2,6 +2,7 @@ var hostname = 'com.0xc0dedbad.kdeconnect_chrome';
 var port = null;
 var defaultDeviceId = null;
 var defaultOnly = false;
+var disableContextMenu = false;
 var knownDevices = {};
 var reconnectDelay = 100;
 var reconnectTimer = null;
@@ -109,6 +110,10 @@ function contextMenuHandler(info, tab) {
 }
 
 function createContextMenus(devices) {
+    if (disableContextMenu) {
+        chrome.contextMenus.removeAll(function() { return; })
+        return;
+    }
     chrome.contextMenus.removeAll(function() {
         var devs = devices;
         if (defaultOnly && defaultDeviceId) {
@@ -163,6 +168,9 @@ function createContextMenus(devices) {
 }
 
 function updateContextMenu(device) {
+    if (disableContextMenu) {
+        return;
+    }
     chrome.contextMenus.update(device.id, {
         title: device.name,
         enabled: device.isReachable && device.isTrusted,
@@ -203,9 +211,11 @@ function onStorageChanged(changes, areaName) {
     if (newDefaultOnly !== undefined) {
         defaultOnly = newDefaultOnly;
     }
-    if (defaultOnly && knownDevices[defaultDeviceId]) {
-        createContextMenus(knownDevices);
+    var newDisableContextMenu = changeValue(changes.disableContextMenu);
+    if (newDisableContextMenu !== undefined) {
+        disableContextMenu = newDisableContextMenu;
     }
+    createContextMenus(knownDevices);
 }
 
 function restoreOptions() {
@@ -213,6 +223,7 @@ function restoreOptions() {
     chrome.storage.sync.get({
         defaultOnly: false,
         defaultDeviceId: null,
+        disableContextMenu: false,
     }, function(items) {
         onStorageChanged({
             defaultDeviceId: {
@@ -220,7 +231,10 @@ function restoreOptions() {
             },
             defaultOnly: {
                 newValue: items.defaultOnly,
-            }
+            },
+            disableContextMenu: {
+                newValue: items.disableContextMenu,
+            },
         }, 'sync');
     });
 }

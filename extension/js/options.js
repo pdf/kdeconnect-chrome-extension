@@ -19,10 +19,12 @@ function toggleDevices(defaultOnly) {
 function saveOptions() {
     var newDefaultDeviceId = document.getElementById('defaultDevice').value;
     var newDefaultOnly = document.getElementById('defaultOnly').checked;
+    var newDisableContextMenu = document.getElementById('disableContextMenu').checked;
 
     chrome.storage.sync.set({
         defaultDeviceId: newDefaultDeviceId,
         defaultOnly: newDefaultOnly,
+        disableContextMenu: newDisableContextMenu,
     }, function() {
         var status = document.getElementById('status');
         status.textContent = 'Saved...';
@@ -36,12 +38,15 @@ function restoreOptions() {
     chrome.storage.sync.get({
         defaultOnly: false,
         defaultDeviceId: null,
+        disableContextMenu: false,
     }, function(items) {
         defaultDeviceId = items.defaultDeviceId;
         var defaultOnly = document.getElementById('defaultOnly');
         defaultOnly.checked = items.defaultOnly;
         document.getElementById('defaultDevice').value = items.defaultDeviceId;
         toggleDevices(defaultOnly);
+        var disableContextMenu = document.getElementById('disableContextMenu');
+        disableContextMenu.checked = items.disableContextMenu;
     });
 }
 
