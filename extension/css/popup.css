@@ -35,8 +35,12 @@ html, body {
   justify-content: center;
 }
 
+.device > span {
+  margin-right: 16px;
+}
+
 button {
-  margin-left: 16px;
+  margin-left: auto;
 }
 
 small {
