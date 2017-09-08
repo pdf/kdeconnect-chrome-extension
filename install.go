@@ -29,6 +29,15 @@ var (
     "chrome-extension://{{.ExtensionID}}/"
   ]
 }`))
+	manifestFirefoxTemplate = template.Must(template.New(`manifest`).Parse(`{
+  "name": "com.0xc0dedbad.kdeconnect_chrome",
+  "description": "KDE Connect",
+  "path": "{{.Path}}",
+  "type": "stdio",
+  "allowed_extensions": [
+	  "kde-connect@0xc0dedbad.com"
+  ]
+}`))
 
 	// OS/browser/user/path
 	installMappings map[string]map[string]map[string]string
@@ -39,7 +48,7 @@ type manifest struct {
 	ExtensionID string
 }
 
-func doInstall(path, extensionID string) error {
+func doInstall(path, browser, extensionID string) error {
 	daemonPath := filepath.Join(path, appName)
 	templatePath := filepath.Join(path, fmt.Sprintf("%s.json", appName))
 
@@ -86,7 +95,14 @@ func doInstall(path, extensionID string) error {
 	if err != nil {
 		return err
 	}
-	//fmt.Println(`Writing template`, templatePath)
+	if browser == `firefox` {
+		if err = manifestFirefoxTemplate.Execute(man, manifest{
+			Path: daemonPath,
+		}); err != nil {
+			return err
+		}
+		return nil
+	}
 	if err = manifestTemplate.Execute(man, manifest{
 		Path:        daemonPath,
 		ExtensionID: extensionID,
@@ -147,6 +163,12 @@ func install() error {
 				),
 				`root`: `/etc/chromium/native-messaging-hosts`,
 			},
+			`firefox`: {
+				def: filepath.Join(
+					u.HomeDir, `/.mozilla/native-messaging-hosts`,
+				),
+				`root`: `/usr/lib/mozilla/native-messaging-hosts`,
+			},
 		},
 		`darwin`: {
 			def: {
@@ -167,6 +189,12 @@ func install() error {
 				),
 				`root`: `/Library/Application Support/Chromium/NativeMessagingHosts`,
 			},
+			`firefox`: {
+				def: filepath.Join(
+					u.HomeDir, `/Library/Application Support/Mozilla/NativeMessagingHosts`,
+				),
+				`root`: `/Library/Application Support/Mozilla/NativeMessagingHosts`,
+			},
 		},
 	}
 
@@ -174,6 +202,7 @@ func install() error {
 	menu.AddMenuItem(`Chrome/Opera`, def)
 	menu.AddMenuItem(`Chromium`, `chromium`)
 	menu.AddMenuItem(`Vivaldi`, `vivaldi`)
+	menu.AddMenuItem(`Firefox`, `firefox`)
 	menu.AddMenuItem(`Custom`, `custom`)
 
 	var (
@@ -211,7 +240,7 @@ func install() error {
 			// custom path
 			path = s
 		}
-		if err := doInstall(path, extensionID); err != nil {
+		if err := doInstall(path, s, extensionID); err != nil {
 			return err
 		}
 	}
