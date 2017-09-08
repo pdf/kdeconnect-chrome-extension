@@ -2,6 +2,8 @@ html, body {
   margin: 0;
   padding: 0;
   background-color: white;
+  font-family: Ubuntu, Arial, sans-serif;
+  font-size: 0.9em;
 }
 
 #container {

@@ -30,7 +30,7 @@ function toggleAction(tab, forced) {
         return;
     }
 
-    if (tab.url.indexOf('chrome://') === 0 || forced === true) {
+    if (tab.url.indexOf('chrome://') === 0 || tab.url.indexOf('about:') === 0 || forced === true) {
         chrome.browserAction.disable(tab.id);
     } else {
         chrome.browserAction.enable(tab.id);
