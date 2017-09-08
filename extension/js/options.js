@@ -3,12 +3,17 @@ var defaultDeviceId = null;
 
 function writeDevices(devices) {
     var devNode = document.getElementById('defaultDevice');
-    devNode.innerHTML = '';
-    Object.keys(devices).forEach(function(key) {
+    while (devNode.hasChildNodes()) {
+        devNode.removeChild(devNode.lastChild);
+    }
+    Object.keys(devices).forEach(function (key) {
         var dev = devices[key];
-        var disabled = (!(dev.isReachable || dev.isTrusted)) ? 'disabled' : null;
-        var selected = defaultDeviceId == dev.id ? 'selected' : null;
-        devNode.innerHTML += '<option value="' + dev.id + '" ' + disabled + ' ' + selected + '>' + dev.name + '</option>';
+        var opt = document.createElement('option');
+        opt.value = dev.id;
+        opt.disabled = (!(dev.isReachable || dev.isTrusted));
+        opt.selected = defaultDeviceId == dev.id;
+        opt.textContent = dev.name;
+        devNode.appendChild(opt);
     });
 }
 
@@ -25,11 +30,11 @@ function saveOptions() {
         defaultDeviceId: newDefaultDeviceId,
         defaultOnly: newDefaultOnly,
         disableContextMenu: newDisableContextMenu,
-    }, function() {
+    }, function () {
         var status = document.getElementById('status');
         status.textContent = 'Saved...';
-        setTimeout(function() {
-            status.innerHTML = '&nbsp;';
+        setTimeout(function () {
+            status.textContent = '';
         }, 750);
     });
 }
@@ -39,7 +44,7 @@ function restoreOptions() {
         defaultOnly: false,
         defaultDeviceId: null,
         disableContextMenu: false,
-    }, function(items) {
+    }, function (items) {
         defaultDeviceId = items.defaultDeviceId;
         var defaultOnly = document.getElementById('defaultOnly');
         defaultOnly.checked = items.defaultOnly;
@@ -71,11 +76,11 @@ function onMessage(msg, sender, sendResponse) {
     }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     restoreOptions();
     fetchDevices();
     document.getElementById('save').addEventListener('click', saveOptions);
-    document.getElementById('defaultOnly').addEventListener('change', function(event) {
+    document.getElementById('defaultOnly').addEventListener('change', function (event) {
         toggleDevices(event.target);
     });
 });

@@ -3,7 +3,7 @@ var knownDevices = {};
 var lastHostVersion = '0.0.5';
 
 function getCurrentTab(callback) {
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         if (tabs.length === 0) {
             return;
         }
@@ -12,7 +12,7 @@ function getCurrentTab(callback) {
 }
 
 function sendUrlCallback(target, url) {
-    return function() {
+    return function () {
         sendUrl(target, url);
     }
 }
@@ -33,36 +33,75 @@ function sendUrl(target, url) {
 
 function writeDevices(devices) {
     var devNode = document.getElementById('devices');
+    while (devNode.hasChildNodes()) {
+        devNode.removeChild(devNode.lastChild);
+    }
     var keys = Object.keys(devices);
     if (keys.length === 0) {
-        devNode.innerHTML = '<small><i>No devices found...</i></small>';
+        var notFound = document.createElement('small');
+        var i = document.createElement('i');
+        i.textContent = 'No devices found...';
+        notFound.appendChild(i);
+        devNode.appendChild(notfound);
         return;
     }
-    devNode.innerHTML = '';
-    keys.forEach(function(key) {
-        devNode.innerHTML += renderDevice(devices[key]);
-        attachDeviceListener(key);
+    keys.forEach(function (key) {
+        var dev = renderDevice(devices[key]);
+        if (dev !== null) {
+            devNode.appendChild(dev);
+            attachDeviceListener(key);
+        }
     });
 }
 
 function writeStatus(details) {
     var devNode = document.getElementById('status');
+    while (devNode.hasChildNodes()) {
+        devNode.removeChild(devNode.lastChild);
+    }
     if (!details) {
-        devNode.innerHTML = '';
         return;
     }
     if (details.update) {
-        devNode.innerHTML = '<p class="status">A host upgrade v' + details.update + ' is available, please follow the <a target="_blank" href="https://github.com/pdf/kdeconnect-chrome-extension#upgrading">upgrade instructions</a>.</p>'
+        var p = document.createElement('p');
+        p.className = 'status';
+        var leader = document.createElement('span');
+        leader.textContent = 'A host upgrade v' + details.update + ' is available, please follow the ';
+        p.appendChild(leader);
+        var link = document.createElement('a');
+        link.target = '_blank';
+        link.href = 'https://github.com/pdf/kdeconnect-chrome-extension#upgrading';
+        link.textContent = 'upgrade instructions';
+        p.appendChild(link);
+        devNode.appendChild(p);
     }
 }
 
 function renderDevice(device) {
-    var disabled = (!(device.isReachable && device.isTrusted)) ? 'disabled' : null;
-    var icon = device.statusIconName || 'smartphone-connected';
-    if (disabled) {
-        icon = device.iconName || 'smartphone-disconnected';
+    if (device === null || device === undefined) {
+        return null;
     }
-    return '<div id="' + device.id + '" class="device"><img class="status-icon" src="images/' + icon + '.svg" /><span>' + device.name + '</span><button ' + disabled + ' data-target="' + device.id + '">Send</button></div>';
+    var devNode = document.createElement('div');
+    devNode.setAttribute('id', device.id)
+    devNode.disabled = (!(device.isReachable && device.isTrusted));
+    devNode.className = 'device';
+    var iconName = device.statusIconName || 'smartphone-connected';
+    if (devNode.disabled) {
+        iconName = device.iconName || 'smartphone-disconnected';
+    }
+    var icon = document.createElement('img');
+    icon.className = 'status-icon';
+    icon.src = 'images/' + iconName + '.svg';
+    devNode.appendChild(icon);
+    var txt = document.createElement('span');
+    txt.textContent = device.name;
+    devNode.appendChild(txt);
+    var btn = document.createElement('button');
+    btn.disabled = devNode.disabled
+    btn.dataset.target = device.id;
+    btn.textContent = 'Send';
+    devNode.appendChild(btn);
+    return devNode;
 }
 
 function attachDeviceListener(id) {
@@ -116,7 +155,7 @@ function onMessage(msg, sender, sendResponse) {
             if (lastHostVersion) {
                 version = lastHostVersion;
             }
-            if (msg.data != version) {
+            if (msg.data !== version) {
                 writeStatus({ update: version });
             } else {
                 writeStatus();
@@ -126,13 +165,13 @@ function onMessage(msg, sender, sendResponse) {
     }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     chrome.storage.sync.get({
         defaultOnly: false,
         defaultDeviceId: null,
-    }, function(items) {
+    }, function (items) {
         if (items.defaultOnly && items.defaultDeviceId) {
-            getCurrentTab(function(tab) {
+            getCurrentTab(function (tab) {
                 if (!tab) {
                     console.warn('Missing tab?!');
                     return;
@@ -144,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         fetchVersion();
         fetchDevices();
-        getCurrentTab(function(tab) {
+        getCurrentTab(function (tab) {
             if (!tab) {
                 console.warn('Missing tab?!');
                 return;

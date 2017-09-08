@@ -67,12 +67,12 @@ function updateBadge(text, color) {
         console.error('Missing params for updateBadge');
         return;
     }
-    chrome.browserAction.getBadgeBackgroundColor({}, function(oldColor) {
-        if (oldColor != color) {
+    chrome.browserAction.getBadgeBackgroundColor({}, function (oldColor) {
+        if (oldColor !== color) {
             chrome.browserAction.setBadgeText({ text: text });
             chrome.browserAction.setBadgeBackgroundColor({ color: color });
         } else {
-            chrome.browserAction.getBadgeText({}, function(oldText) {
+            chrome.browserAction.getBadgeText({}, function (oldText) {
                 if (oldText !== text) {
                     chrome.browserAction.setBadgeText({ text: text });
                     chrome.browserAction.setBadgeBackgroundColor({ color: color });
@@ -88,7 +88,7 @@ function setBadge(source, text, color) {
 }
 
 function clearBadge(source) {
-    delete(badges[source]);
+    delete (badges[source]);
     var keys = Object.keys(badges);
     if (keys.length === 0) {
         updateBadge('', [0, 0, 0, 0]);
@@ -111,10 +111,10 @@ function contextMenuHandler(info, tab) {
 
 function createContextMenus(devices) {
     if (disableContextMenu) {
-        chrome.contextMenus.removeAll(function() { return; })
+        chrome.contextMenus.removeAll(function () { return; })
         return;
     }
-    chrome.contextMenus.removeAll(function() {
+    chrome.contextMenus.removeAll(function () {
         var devs = devices;
         if (defaultOnly && defaultDeviceId) {
             devs = {};
@@ -122,10 +122,12 @@ function createContextMenus(devices) {
         }
         var keys = Object.keys(devs);
         var active = false;
-        keys.forEach(function(key) {
-            if (devs[key].isReachable && devs[key].isTrusted) {
-                active = true;
-                return;
+        keys.forEach(function (key) {
+            if (devs[key] !== null || devs[key] !== undefined) {
+                if (devs[key].isReachable && devs[key].isTrusted) {
+                    active = true;
+                    return;
+                }
             }
         });
         if (!active) {
@@ -154,7 +156,7 @@ function createContextMenus(devices) {
             title: 'KDE Connect',
             contexts: ['page', 'frame', 'link', 'image', 'video', 'audio'],
         });
-        Object.keys(devs).forEach(function(key) {
+        Object.keys(devs).forEach(function (key) {
             chrome.contextMenus.create({
                 id: key,
                 title: devs[key].name,
@@ -200,7 +202,7 @@ function changeValue(change) {
 }
 
 function onStorageChanged(changes, areaName) {
-    if (areaName != 'sync') {
+    if (areaName !== 'sync') {
         return;
     }
     var newDefaultDeviceId = changeValue(changes.defaultDeviceId);
@@ -224,7 +226,7 @@ function restoreOptions() {
         defaultOnly: false,
         defaultDeviceId: null,
         disableContextMenu: false,
-    }, function(items) {
+    }, function (items) {
         onStorageChanged({
             defaultDeviceId: {
                 newValue: items.defaultDeviceId,
@@ -255,7 +257,7 @@ function onMessage(msg) {
             if (lastHostVersion) {
                 version = lastHostVersion;
             }
-            if (msg.data != version) {
+            if (msg.data !== version) {
                 updatePending = version;
                 setBadge('update', '!', blue);
             } else {
@@ -293,7 +295,7 @@ function onDisconnect() {
     console.warn('Disconnected from native host: ' + message);
 
     // Exponential back-off on reconnect
-    reconnectTimer = window.setTimeout(function() {
+    reconnectTimer = window.setTimeout(function () {
         connect();
     }, reconnectDelay);
     reconnectDelay = reconnectDelay * 2;
@@ -303,7 +305,7 @@ function connect() {
     clearBadge('connected');
     port = chrome.runtime.connectNative(hostname);
     // Reset the back-off delay if we stay connected
-    reconnectResetTimer = window.setTimeout(function() {
+    reconnectResetTimer = window.setTimeout(function () {
         reconnectDelay = 100;
     }, reconnectDelay * 0.9);
 
@@ -311,7 +313,7 @@ function connect() {
     port.onMessage.addListener(onMessage);
     port.postMessage({ type: 'typeVersion' });
     // TODO: Remove when missing typeVersion on host is considered unlikely
-    window.setTimeout(function() {
+    window.setTimeout(function () {
         if (updatePending === null) {
             // We did not receive a response to our typeUpdate message from the
             // host
@@ -328,10 +330,10 @@ restoreOptions();
 
 chrome.runtime.onMessage.addListener(onRuntimeMessage);
 
-chrome.tabs.onActivated.addListener(function(info) {
+chrome.tabs.onActivated.addListener(function (info) {
     chrome.tabs.get(info.tabId, toggleAction);
 });
 
-chrome.tabs.onUpdated.addListener(function(tabId, change, tab) {
+chrome.tabs.onUpdated.addListener(function (tabId, change, tab) {
     toggleAction(tab);
 });
