@@ -1,5 +1,19 @@
 var defaultDeviceId = null;
 
+function logError(error) {
+    // Suppress errors caused by Mozilla polyfill
+    // TODO: Fix these somehow?
+    if (
+        error.message !== 'Could not establish connection. Receiving end does not exist.' &&
+        error.message !== 'The message port closed before a response was received.'
+    ) {
+        console.error(error.message)
+    }
+}
+
+function sendMessage(msg) {
+    browser.runtime.sendMessage(msg).then(function () { return true; }).catch(logError)
+}
 
 function writeDevices(devices) {
     var devNode = document.getElementById('defaultDevice');
@@ -26,25 +40,28 @@ function saveOptions() {
     var newDefaultOnly = document.getElementById('defaultOnly').checked;
     var newDisableContextMenu = document.getElementById('disableContextMenu').checked;
 
-    chrome.storage.sync.set({
+    browser.storage.sync.set({
         defaultDeviceId: newDefaultDeviceId,
         defaultOnly: newDefaultOnly,
         disableContextMenu: newDisableContextMenu,
-    }, function () {
+    }).then(function () {
         var status = document.getElementById('status');
         status.textContent = 'Saved...';
         setTimeout(function () {
             status.textContent = '';
         }, 750);
+    }).catch(function (error) {
+        var status = document.getElementById('status');
+        status.textContent = 'Error: ' + error.message;
     });
 }
 
 function restoreOptions() {
-    chrome.storage.sync.get({
+    browser.storage.sync.get({
         defaultOnly: false,
         defaultDeviceId: null,
         disableContextMenu: false,
-    }, function (items) {
+    }).then(function (items) {
         defaultDeviceId = items.defaultDeviceId;
         var defaultOnly = document.getElementById('defaultOnly');
         defaultOnly.checked = items.defaultOnly;
@@ -52,18 +69,20 @@ function restoreOptions() {
         toggleDevices(defaultOnly);
         var disableContextMenu = document.getElementById('disableContextMenu');
         disableContextMenu.checked = items.disableContextMenu;
+    }).catch(function (error) {
+        console.error('Error restoring options: ' + error.message);
     });
 }
 
 
 function fetchDevices() {
-    chrome.runtime.sendMessage({
+    sendMessage({
         type: 'typeDevices',
     });
 }
 
-function onMessage(msg, sender, sendResponse) {
-    if (sender.url !== 'chrome-extension://' + chrome.runtime.id + '/background.html') {
+function onMessage(msg, sender) {
+    if (sender.url.indexOf('/background.html') < 0) {
         // Messages flow one-way
         return;
     }
@@ -72,7 +91,7 @@ function onMessage(msg, sender, sendResponse) {
             writeDevices(msg.data);
             break;
         default:
-            return;
+            return Promise.resolve();
     }
 }
 
@@ -85,4 +104,4 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-chrome.runtime.onMessage.addListener(onMessage);
+browser.runtime.onMessage.addListener(onMessage);

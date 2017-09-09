@@ -16,6 +16,17 @@ var orange = [255, 129, 0, 220];
 var blue = [0, 116, 255, 220];
 var lastHostVersion = '0.0.5';
 
+function logError(error) {
+    // Suppress errors caused by Mozilla polyfill
+    // TODO: Fix these somehow?
+    if (
+        error.message !== 'Could not establish connection. Receiving end does not exist.' &&
+        error.message !== 'The message port closed before a response was received.'
+    ) {
+        console.error(error.message)
+    }
+}
+
 function toggleAction(tab, forced) {
     if (!tab) {
         console.error(`Missing tab for toggleAction`);
@@ -31,35 +42,40 @@ function toggleAction(tab, forced) {
     }
 
     if (tab.url.indexOf('chrome://') === 0 || tab.url.indexOf('about:') === 0 || forced === true) {
-        chrome.browserAction.disable(tab.id);
+        browser.browserAction.disable(tab.id);
     } else {
-        chrome.browserAction.enable(tab.id);
+        browser.browserAction.enable(tab.id);
     }
 }
 
-function sendMessage(msg) {
+function postMessage(msg) {
     if (!port || !msg || !msg.type) {
         console.error('Missing message parameters');
     }
     port.postMessage(msg);
 }
 
-function onRuntimeMessage(msg, sender, sendResponse) {
-    if (sender.url === 'chrome-extension://' + chrome.runtime.id + '/background.html') {
+function sendMessage(msg) {
+    browser.runtime.sendMessage(msg).then(function () { return true; }).catch(logError);
+}
+
+function onMessage(msg, sender, sendResponse) {
+    if (sender.url.indexOf('/background.html') > 0) {
         // Ignore locally generated messages
-        return;
+        return Promise.resolve();
     }
     switch (msg.type) {
         case 'typeVersion':
             // TODO: Remove when missing typeVersion on host is considered unlikely
             if (updatePending === null) {
-                chrome.runtime.sendMessage({ type: 'typeVersion', data: '0.0.0' });
+                sendMessage({ type: 'typeVersion', data: '0.0.0' });
             }
-            sendMessage(msg);
+            postMessage(msg);
             break;
         default:
-            sendMessage(msg);
+            postMessage(msg);
     }
+    return Promise.resolve();
 }
 
 function updateBadge(text, color) {
@@ -67,15 +83,15 @@ function updateBadge(text, color) {
         console.error('Missing params for updateBadge');
         return;
     }
-    chrome.browserAction.getBadgeBackgroundColor({}, function (oldColor) {
+    browser.browserAction.getBadgeBackgroundColor({}).then(function (oldColor) {
         if (oldColor !== color) {
-            chrome.browserAction.setBadgeText({ text: text });
-            chrome.browserAction.setBadgeBackgroundColor({ color: color });
+            browser.browserAction.setBadgeText({ text: text });
+            browser.browserAction.setBadgeBackgroundColor({ color: color });
         } else {
-            chrome.browserAction.getBadgeText({}, function (oldText) {
+            browser.browserAction.getBadgeText({}).then(function (oldText) {
                 if (oldText !== text) {
-                    chrome.browserAction.setBadgeText({ text: text });
-                    chrome.browserAction.setBadgeBackgroundColor({ color: color });
+                    browser.browserAction.setBadgeText({ text: text });
+                    browser.browserAction.setBadgeBackgroundColor({ color: color });
                 }
             });
         }
@@ -100,7 +116,7 @@ function clearBadge(source) {
 }
 
 function contextMenuHandler(info, tab) {
-    sendMessage({
+    postMessage({
         type: 'typeShare',
         data: {
             target: info.menuItemId,
@@ -111,10 +127,10 @@ function contextMenuHandler(info, tab) {
 
 function createContextMenus(devices) {
     if (disableContextMenu) {
-        chrome.contextMenus.removeAll(function () { return; })
+        browser.contextMenus.removeAll();
         return;
     }
-    chrome.contextMenus.removeAll(function () {
+    browser.contextMenus.removeAll().then(function () {
         var devs = devices;
         if (defaultOnly && defaultDeviceId) {
             devs = {};
@@ -141,7 +157,7 @@ function createContextMenus(devices) {
 
         if (keys.length === 1) {
             var key = keys[0];
-            chrome.contextMenus.create({
+            browser.contextMenus.create({
                 id: key,
                 title: 'KDE Connect (' + devs[key].name + ')',
                 enabled: devs[key].isReachable && devs[key].isTrusted,
@@ -151,13 +167,13 @@ function createContextMenus(devices) {
             return;
         }
 
-        chrome.contextMenus.create({
+        browser.contextMenus.create({
             id: 'kdeconnectRoot',
             title: 'KDE Connect',
             contexts: ['page', 'frame', 'link', 'image', 'video', 'audio'],
         });
         Object.keys(devs).forEach(function (key) {
-            chrome.contextMenus.create({
+            browser.contextMenus.create({
                 id: key,
                 title: devs[key].name,
                 enabled: devs[key].isReachable && devs[key].isTrusted,
@@ -173,7 +189,7 @@ function updateContextMenu(device) {
     if (disableContextMenu) {
         return;
     }
-    chrome.contextMenus.update(device.id, {
+    browser.contextMenus.update(device.id, {
         title: device.name,
         enabled: device.isReachable && device.isTrusted,
     });
@@ -203,7 +219,7 @@ function changeValue(change) {
 
 function onStorageChanged(changes, areaName) {
     if (areaName !== 'sync') {
-        return;
+        return Promise.resolve();
     }
     var newDefaultDeviceId = changeValue(changes.defaultDeviceId);
     if (newDefaultDeviceId !== undefined) {
@@ -218,15 +234,16 @@ function onStorageChanged(changes, areaName) {
         disableContextMenu = newDisableContextMenu;
     }
     createContextMenus(knownDevices);
+    return Promise.resolve();
 }
 
 function restoreOptions() {
-    chrome.storage.onChanged.addListener(onStorageChanged);
-    chrome.storage.sync.get({
+    browser.storage.onChanged.addListener(onStorageChanged);
+    browser.storage.sync.get({
         defaultOnly: false,
         defaultDeviceId: null,
         disableContextMenu: false,
-    }, function (items) {
+    }).then(function (items) {
         onStorageChanged({
             defaultDeviceId: {
                 newValue: items.defaultDeviceId,
@@ -241,19 +258,19 @@ function restoreOptions() {
     });
 }
 
-function onMessage(msg) {
+function onPortMessage(msg) {
     switch (msg.type) {
         case 'typeDeviceUpdate':
             updateDevice(msg.data);
-            chrome.runtime.sendMessage(msg);
+            sendMessage(msg);
             break;
         case 'typeDevices':
             knownDevices = msg.data;
             createContextMenus(msg.data);
-            chrome.runtime.sendMessage(msg);
+            sendMessage(msg);
             break;
         case 'typeVersion':
-            var version = chrome.runtime.getManifest().version;
+            var version = browser.runtime.getManifest().version;
             if (lastHostVersion) {
                 version = lastHostVersion;
             }
@@ -264,10 +281,11 @@ function onMessage(msg) {
                 updatePending = false;
                 clearBadge('update');
             }
-            chrome.runtime.sendMessage(msg);
+            sendMessage(msg);
         default:
-            chrome.runtime.sendMessage(msg);
+            sendMessage(msg);
     }
+    return Promise.resolve();
 }
 
 function resetReconnect() {
@@ -289,8 +307,8 @@ function onDisconnect() {
     }
 
     var message;
-    if (chrome.runtime.lastError) {
-        message = chrome.runtime.lastError.message;
+    if (browser.runtime.lastError) {
+        message = browser.runtime.lastError.message;
     }
     console.warn('Disconnected from native host: ' + message);
 
@@ -299,25 +317,26 @@ function onDisconnect() {
         connect();
     }, reconnectDelay);
     reconnectDelay = reconnectDelay * 2;
+    return Promise.resolve();
 }
 
 function connect() {
     clearBadge('connected');
-    port = chrome.runtime.connectNative(hostname);
+    port = browser.runtime.connectNative(hostname);
     // Reset the back-off delay if we stay connected
     reconnectResetTimer = window.setTimeout(function () {
         reconnectDelay = 100;
     }, reconnectDelay * 0.9);
 
     port.onDisconnect.addListener(onDisconnect);
-    port.onMessage.addListener(onMessage);
+    port.onMessage.addListener(onPortMessage);
     port.postMessage({ type: 'typeVersion' });
     // TODO: Remove when missing typeVersion on host is considered unlikely
     window.setTimeout(function () {
         if (updatePending === null) {
             // We did not receive a response to our typeUpdate message from the
             // host
-            sendMessage({ type: 'typeError', data: '' });
+            postMessage({ type: 'typeError', data: '' });
             setBadge('update', '!', red);
         }
     }, 1000)
@@ -328,12 +347,12 @@ connect();
 
 restoreOptions();
 
-chrome.runtime.onMessage.addListener(onRuntimeMessage);
+browser.runtime.onMessage.addListener(onMessage);
 
-chrome.tabs.onActivated.addListener(function (info) {
-    chrome.tabs.get(info.tabId, toggleAction);
+browser.tabs.onActivated.addListener(function (info) {
+    browser.tabs.get(info.tabId).then(toggleAction);
 });
 
-chrome.tabs.onUpdated.addListener(function (tabId, change, tab) {
+browser.tabs.onUpdated.addListener(function (tabId, change, tab) {
     toggleAction(tab);
 });

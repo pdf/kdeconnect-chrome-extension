@@ -2,8 +2,23 @@ var currentUrl = null;
 var knownDevices = {};
 var lastHostVersion = '0.0.5';
 
+function logError(error) {
+    // Suppress errors caused by Mozilla polyfill
+    // TODO: Fix these somehow?
+    if (
+        error.message !== 'Could not establish connection. Receiving end does not exist.' &&
+        error.message !== 'The message port closed before a response was received.'
+    ) {
+        console.error(error.message)
+    }
+}
+
+function sendMessage(msg) {
+    browser.runtime.sendMessage(msg).then(function () { return true; }).catch(logError)
+}
+
 function getCurrentTab(callback) {
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    browser.tabs.query({ active: true, currentWindow: true }).then(function (tabs) {
         if (tabs.length === 0) {
             return;
         }
@@ -21,7 +36,7 @@ function sendUrl(target, url) {
     if (!target || !url) {
         console.warn('Missing params for sendUrl');
     }
-    chrome.runtime.sendMessage({
+    sendMessage({
         type: 'typeShare',
         data: {
             target: target,
@@ -126,21 +141,21 @@ function updateDevice(device) {
 }
 
 function fetchDevices() {
-    chrome.runtime.sendMessage({
+    sendMessage({
         type: 'typeDevices',
     });
 }
 
 function fetchVersion() {
-    chrome.runtime.sendMessage({
+    sendMessage({
         type: 'typeVersion',
     });
 }
 
-function onMessage(msg, sender, sendResponse) {
-    if (sender.url !== 'chrome-extension://' + chrome.runtime.id + '/background.html') {
+function onMessage(msg, sender) {
+    if (sender.url.indexOf('/background.html') < 0) {
         // Messages flow one-way
-        return;
+        return Promise.resolve();
     }
     switch (msg.type) {
         case 'typeDeviceUpdate':
@@ -151,7 +166,7 @@ function onMessage(msg, sender, sendResponse) {
             writeDevices(msg.data);
             break;
         case 'typeVersion':
-            var version = chrome.runtime.getManifest().version;
+            var version = browser.runtime.getManifest().version;
             if (lastHostVersion) {
                 version = lastHostVersion;
             }
@@ -161,15 +176,15 @@ function onMessage(msg, sender, sendResponse) {
                 writeStatus();
             }
         default:
-            return;
+            return Promise.resolve();
     }
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    chrome.storage.sync.get({
+    browser.storage.sync.get({
         defaultOnly: false,
         defaultDeviceId: null,
-    }, function (items) {
+    }).then(function (items) {
         if (items.defaultOnly && items.defaultDeviceId) {
             getCurrentTab(function (tab) {
                 if (!tab) {
@@ -193,4 +208,4 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-chrome.runtime.onMessage.addListener(onMessage);
+browser.runtime.onMessage.addListener(onMessage);
