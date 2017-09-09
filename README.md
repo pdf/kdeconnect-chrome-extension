@@ -3,7 +3,7 @@
 A Chrome (and compatible) browser extension to send pages and content from your
 browser to connected KDE Connect devices, via browser action or context menu.
 
-*Update*: As of v0.1.0 the browser extension now also [supports Firefox](https://addons.mozilla.org/en-US/firefox/addon/kde_connect/).
+__Update__: As of v0.1.0 the browser extension and installer now also [supports Firefox](https://addons.mozilla.org/en-US/firefox/addon/kde_connect/).
 
 ## Installation
 
