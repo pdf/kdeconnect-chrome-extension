@@ -96,21 +96,16 @@ func doInstall(path, browser, extensionID string) error {
 		return err
 	}
 	if browser == `firefox` {
-		if err = manifestFirefoxTemplate.Execute(man, manifest{
+		err = manifestFirefoxTemplate.Execute(man, manifest{
 			Path: daemonPath,
-		}); err != nil {
-			return err
-		}
-		return nil
-	}
-	if err = manifestTemplate.Execute(man, manifest{
-		Path:        daemonPath,
-		ExtensionID: extensionID,
-	}); err != nil {
+		})
 		return err
 	}
-
-	return nil
+	err = manifestTemplate.Execute(man, manifest{
+		Path:        daemonPath,
+		ExtensionID: extensionID,
+	})
+	return err
 }
 
 func hasCustom(selection []string) bool {
@@ -122,7 +117,7 @@ func hasCustom(selection []string) bool {
 	return false
 }
 
-func install() error {
+func install(developer bool) error {
 	u, err := user.Current()
 	if err != nil {
 		return err
@@ -227,8 +222,12 @@ func install() error {
 	}
 
 	var extensionID string
-	for extensionID == `` {
-		extensionID = climenu.GetText(`Extension ID (Enter accepts default)`, defaultExtensionID)
+	if developer {
+		for extensionID == `` {
+			extensionID = climenu.GetText(`Extension ID (Enter accepts default)`, defaultExtensionID)
+		}
+	} else {
+		extensionID = defaultExtensionID
 	}
 
 	for _, s := range selection {
