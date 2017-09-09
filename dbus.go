@@ -64,8 +64,7 @@ func (d *deviceList) all() map[string]*Device {
 }
 
 func (d *deviceList) Close() error {
-	var err error
-	err = d.conn.Close()
+	err := d.conn.Close()
 	for _, d := range d.devices {
 		if e := d.Close(); err != nil {
 			log(e)

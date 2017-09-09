@@ -1,6 +1,6 @@
 var currentUrl = null;
 var knownDevices = {};
-var lastHostVersion = '0.0.5';
+var lastHostVersion = '0.1.0';
 
 function logError(error) {
     // Suppress errors caused by Mozilla polyfill

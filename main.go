@@ -9,13 +9,14 @@ import (
 )
 
 const (
-	version = `0.0.5`
+	version = `0.1.0`
 )
 
 var (
-	messageQueue = make(chan *message, 10)
-	devices      *deviceList
-	installFlag  bool
+	messageQueue  = make(chan *message, 10)
+	devices       *deviceList
+	installFlag   bool
+	developerFlag bool
 )
 
 type message struct {
@@ -108,6 +109,7 @@ func init() {
 	var err error
 
 	flag.BoolVar(&installFlag, `install`, false, `Perform installation`)
+	flag.BoolVar(&developerFlag, `dev`, false, `Install as developer`)
 	flag.Parse()
 
 	if devices, err = newDeviceList(); err != nil {
@@ -117,7 +119,7 @@ func init() {
 
 func main() {
 	if installFlag {
-		if err := install(); err != nil {
+		if err := install(developerFlag); err != nil {
 			panic(err)
 		}
 		os.Exit(0)
