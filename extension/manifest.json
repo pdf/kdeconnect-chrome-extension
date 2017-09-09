@@ -41,5 +41,10 @@
     "24": "images/kdeconnect-24.png",
     "22": "images/kdeconnect-22.png",
     "16": "images/kdeconnect-16.png"
+  },
+  "applications": {
+    "gecko": {
+      "id": "kde-connect@0xc0dedbad.com"
+    }
   }
 }
