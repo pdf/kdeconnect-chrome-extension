@@ -35,7 +35,7 @@ extensions.
    ```
 
 4. Start your browser.
-5. Install the extension from the [Chome Web Store](https://chrome.google.com/webstore/detail/kde-connect/ofmplbbfigookafjahpeepbggpofdhbo).
+5. Install the extension from the [Chome Web Store](https://chrome.google.com/webstore/detail/kde-connect/ofmplbbfigookafjahpeepbggpofdhbo) or [Mozilla Add-ons](https://addons.mozilla.org/en-US/firefox/addon/kde_connect/).
 6. Done
 
 Currently only Linux amd64 builds are produced, however please file an issue if
