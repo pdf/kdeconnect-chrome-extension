@@ -14,7 +14,7 @@ var badges = {};
 var red = [255, 0, 0, 220];
 var orange = [255, 129, 0, 220];
 var blue = [0, 116, 255, 220];
-var lastHostVersion = '0.1.0';
+var lastHostVersion = '0.1.3';
 
 function logError(error) {
     // Suppress errors caused by Mozilla polyfill
