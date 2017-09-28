@@ -92,23 +92,16 @@ type Device struct {
 	sync.RWMutex
 }
 
-/*
-func init() {
-	conn, err := dbus.SessionBus()
-	if err != nil {
-		panic(err)
-	}
-	// Debugging
-	if err = introSpect(conn.Object(dest, dbus.ObjectPath(fmt.Sprintf("%s/devices", path)))); err != nil {
-		log(err)
-	}
-}
-*/
-
 func (d *Device) watch() error {
+	// kdeconnect < v1.2
 	if err := d.addMatchSignal(`reachableStatusChanged`); err != nil {
 		return err
 	}
+	// kdeconnect >= v1.2
+	if err := d.addMatchSignal(`reachableChanged`); err != nil {
+		return err
+	}
+
 	if err := d.addMatchSignal(`stateChanged`); err != nil {
 		return err
 	}
