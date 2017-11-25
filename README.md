@@ -24,7 +24,7 @@ extensions.
    to select your browser(s), and `Enter` to accept. The installer will deploy
    itself to the appropriate location for the selected browser.
 
-   When prompted for the extension ID, just hit `Enter` to continue, unless you
+   If prompted for an extension ID, just hit `Enter` to continue, unless you
    are a developer.
 
    If you wish to deploy system-wide, rather than for the current user, simply
@@ -60,7 +60,7 @@ If you are prompted to upgrade the host application, follow these instructions.
    to select your browser(s), and `Enter` to accept. The installer will deploy
    itself to the appropriate location for the selected browser.
 
-   When prompted for the extension ID, just hit `Enter` to continue, unless you
+   If prompted for an extension ID, just hit `Enter` to continue, unless you
    are a developer.
 
    If you wish to deploy system-wide, rather than for the current user, simply
