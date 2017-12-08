@@ -6,7 +6,7 @@
   "version": "0.1.4",
   "homepage_url": "https://github.com/pdf/kdeconnect-chrome-extension",
   "browser_action": {
-    "default_name": "KDE Connect",
+    "default_title": "KDE Connect",
     "default_popup": "popup.html",
     "default_icon": {
       "256": "images/kdeconnect-256.png",
