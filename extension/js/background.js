@@ -8,6 +8,7 @@ var reconnectDelay = 100;
 var reconnectTimer = null;
 var reconnectResetTimer = null;
 var updatePending = null;
+var versionTimer = null;
 
 var badges = {};
 
@@ -23,7 +24,7 @@ function logError(error) {
         error.message !== 'Could not establish connection. Receiving end does not exist.' &&
         error.message !== 'The message port closed before a response was received.'
     ) {
-        console.error(error.message)
+        console.error(error.message);
     }
 }
 
@@ -50,7 +51,7 @@ function toggleAction(tab, forced) {
 
 function postMessage(msg) {
     if (!port || !msg || !msg.type) {
-        console.error('Missing message parameters');
+        console.error('Missing message parameters', msg);
     }
     port.postMessage(msg);
 }
@@ -66,11 +67,8 @@ function onMessage(msg, sender, sendResponse) {
     }
     switch (msg.type) {
         case 'typeVersion':
-            // TODO: Remove when missing typeVersion on host is considered unlikely
-            if (updatePending === null) {
-                sendMessage({ type: 'typeVersion', data: '0.0.0' });
-            }
             postMessage(msg);
+            versionTimeout();
             break;
         default:
             postMessage(msg);
@@ -269,19 +267,35 @@ function onPortMessage(msg) {
             createContextMenus(msg.data);
             sendMessage(msg);
             break;
+        case 'typeError':
+            sendMessage({
+                type: 'typeStatus',
+                data: {
+                    type: 'typeError',
+                    key: 'host',
+                    error: msg.data,
+                }
+            });
+            break;
         case 'typeVersion':
-            var version = browser.runtime.getManifest().version;
-            if (lastHostVersion) {
-                version = lastHostVersion;
-            }
-            if (msg.data !== version) {
-                updatePending = version;
+            if (msg.data !== lastHostVersion) {
+                updatePending = lastHostVersion;
                 setBadge('update', '!', blue);
+                sendMessage({
+                    type: 'typeStatus',
+                    data: {
+                        type: 'typeVersion',
+                        key: 'update',
+                        update: lastHostVersion,
+                        current: msg.data,
+                    }
+                });
             } else {
                 updatePending = false;
                 clearBadge('update');
+                sendMessage({ type: 'typeClearStatus', data: { key: 'update' } });
             }
-            sendMessage(msg);
+            break;
         default:
             sendMessage(msg);
     }
@@ -295,6 +309,13 @@ function resetReconnect() {
 function onDisconnect() {
     port = null;
     setBadge('connected', '!', red);
+    sendMessage({
+        type: 'typeStatus', data: {
+            type: 'typeError',
+            key: 'connected',
+            error: 'could not connect to native host',
+        }
+    });
     // Disconnected, cancel back-off reset
     if (typeof reconnectResetTimer === 'number') {
         window.clearTimeout(reconnectResetTimer);
@@ -320,8 +341,29 @@ function onDisconnect() {
     return Promise.resolve();
 }
 
+function versionTimeout() {
+    if (versionTimer) {
+        window.clearTimeout(versionTimer);
+    }
+    versionTimer = window.setTimeout(function () {
+        if (updatePending === null) {
+            // We did not receive a response to our typeUpdate message from the
+            // host
+            sendMessage({
+                type: 'typeStatus', data: {
+                    type: 'typeError',
+                    key: 'update',
+                    error: 'no version response received from native host',
+                }
+            });
+            setBadge('update', '!', red);
+        }
+    }, 500);
+}
+
 function connect() {
     clearBadge('connected');
+    sendMessage({ type: 'typeClearStatus', data: { key: 'connected' } });
     port = browser.runtime.connectNative(hostname);
     // Reset the back-off delay if we stay connected
     reconnectResetTimer = window.setTimeout(function () {
@@ -331,15 +373,7 @@ function connect() {
     port.onDisconnect.addListener(onDisconnect);
     port.onMessage.addListener(onPortMessage);
     port.postMessage({ type: 'typeVersion' });
-    // TODO: Remove when missing typeVersion on host is considered unlikely
-    window.setTimeout(function () {
-        if (updatePending === null) {
-            // We did not receive a response to our typeUpdate message from the
-            // host
-            postMessage({ type: 'typeError', data: '' });
-            setBadge('update', '!', red);
-        }
-    }, 1000)
+    versionTimeout();
     port.postMessage({ type: 'typeDevices' });
 }
 

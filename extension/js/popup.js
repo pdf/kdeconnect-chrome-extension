@@ -1,6 +1,5 @@
 var currentUrl = null;
 var knownDevices = {};
-var lastHostVersion = '0.1.3';
 
 function logError(error) {
     // Suppress errors caused by Mozilla polyfill
@@ -9,12 +8,12 @@ function logError(error) {
         error.message !== 'Could not establish connection. Receiving end does not exist.' &&
         error.message !== 'The message port closed before a response was received.'
     ) {
-        console.error(error.message)
+        console.error(error.message);
     }
 }
 
 function sendMessage(msg) {
-    browser.runtime.sendMessage(msg).then(function () { return true; }).catch(logError)
+    browser.runtime.sendMessage(msg).then(function () { return true; }).catch(logError);
 }
 
 function getCurrentTab(callback) {
@@ -69,26 +68,45 @@ function writeDevices(devices) {
     });
 }
 
-function writeStatus(details) {
-    var devNode = document.getElementById('status');
-    while (devNode.hasChildNodes()) {
-        devNode.removeChild(devNode.lastChild);
-    }
-    if (!details) {
+function addStatus(msg) {
+    if (!msg || !msg.data || !msg.data.key) {
         return;
     }
-    if (details.update) {
-        var p = document.createElement('p');
-        p.className = 'status';
-        var leader = document.createElement('span');
-        leader.textContent = 'A host upgrade v' + details.update + ' is available, please follow the ';
-        p.appendChild(leader);
-        var link = document.createElement('a');
-        link.target = '_blank';
-        link.href = 'https://github.com/pdf/kdeconnect-chrome-extension#upgrading';
-        link.textContent = 'upgrade instructions';
-        p.appendChild(link);
-        devNode.appendChild(p);
+    var devNode = document.getElementById('status');
+    var p = document.getElementById('status-' + msg.data.key);
+    if (!p) {
+        p = document.createElement('p');
+    }
+    p.innerHTML = '';
+    p.id = 'status-' + msg.data.key;
+    p.className = 'status';
+    var leader = document.createElement('span');
+    p.appendChild(leader);
+    switch (msg.data.type) {
+        case 'typeVersion':
+            leader.textContent = 'A host upgrade v' + msg.data.update + ' is available (current: v' + msg.data.current + '), please follow the ';
+            var link = document.createElement('a');
+            link.target = '_blank';
+            link.href = 'https://github.com/pdf/kdeconnect-chrome-extension#upgrading';
+            link.textContent = 'upgrade instructions';
+            p.appendChild(link);
+            break;
+        case 'typeError':
+            leader.style = 'color: red;'
+            leader.textContent = 'Error: ' + msg.data.error;
+            break;
+    }
+    devNode.appendChild(p);
+}
+
+function removeStatus(msg) {
+    if (!msg || !msg.data || !msg.data.key) {
+        return;
+    }
+    var devNode = document.getElementById('status');
+    var p = document.getElementById('status-' + msg.data.key);
+    if (p) {
+        devNode.removeChild(p);
     }
 }
 
@@ -97,7 +115,7 @@ function renderDevice(device) {
         return null;
     }
     var devNode = document.createElement('div');
-    devNode.setAttribute('id', device.id)
+    devNode.setAttribute('id', device.id);
     devNode.disabled = (!(device.isReachable && device.isTrusted));
     devNode.className = 'device';
     var iconName = device.statusIconName || 'smartphone-connected';
@@ -112,7 +130,7 @@ function renderDevice(device) {
     txt.textContent = device.name;
     devNode.appendChild(txt);
     var btn = document.createElement('button');
-    btn.disabled = devNode.disabled
+    btn.disabled = devNode.disabled;
     btn.dataset.target = device.id;
     btn.textContent = 'Send';
     devNode.appendChild(btn);
@@ -165,16 +183,12 @@ function onMessage(msg, sender) {
             knownDevices = msg.data;
             writeDevices(msg.data);
             break;
-        case 'typeVersion':
-            var version = browser.runtime.getManifest().version;
-            if (lastHostVersion) {
-                version = lastHostVersion;
-            }
-            if (msg.data !== version) {
-                writeStatus({ update: version });
-            } else {
-                writeStatus();
-            }
+        case 'typeStatus':
+            addStatus(msg);
+            break;
+        case 'typeClearStatus':
+            removeStatus(msg);
+            break;
         default:
             return Promise.resolve();
     }
