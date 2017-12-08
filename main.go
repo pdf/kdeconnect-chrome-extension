@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"runtime"
 )
 
 const (
@@ -17,6 +18,7 @@ var (
 	devices       *deviceList
 	installFlag   bool
 	developerFlag bool
+	versionFlag   bool
 )
 
 type message struct {
@@ -110,6 +112,7 @@ func init() {
 
 	flag.BoolVar(&installFlag, `install`, false, `Perform installation`)
 	flag.BoolVar(&developerFlag, `dev`, false, `Install as developer`)
+	flag.BoolVar(&versionFlag, `version`, false, `Display version`)
 	flag.Parse()
 
 	if devices, err = newDeviceList(); err != nil {
@@ -118,6 +121,11 @@ func init() {
 }
 
 func main() {
+	if versionFlag {
+		fmt.Printf("kdeconnect-chrome-extension version %s, built with %s\n", version, runtime.Version())
+		os.Exit(0)
+	}
+
 	if installFlag {
 		if err := install(developerFlag); err != nil {
 			panic(err)
