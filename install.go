@@ -51,8 +51,9 @@ type manifest struct {
 func doInstall(path, browser, extensionID string) error {
 	daemonPath := filepath.Join(path, appName)
 	templatePath := filepath.Join(path, fmt.Sprintf("%s.json", appName))
+	var err error
 
-	if err := os.MkdirAll(path, 0755); err != nil && !os.IsExist(err) {
+	if err = os.MkdirAll(path, 0755); err != nil && !os.IsExist(err) {
 		return err
 	}
 
@@ -62,7 +63,7 @@ func doInstall(path, browser, extensionID string) error {
 	}
 	in, err := os.Open(exe)
 	defer func() {
-		if e := in.Close(); err != nil {
+		if e := in.Close(); err == nil && e != nil {
 			fmt.Println(e)
 			panic(e)
 		}
@@ -72,7 +73,7 @@ func doInstall(path, browser, extensionID string) error {
 	}
 	out, err := os.OpenFile(daemonPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
 	defer func() {
-		if e := out.Close(); err != nil {
+		if e := in.Close(); err == nil && e != nil {
 			fmt.Println(e)
 			panic(e)
 		}
@@ -80,7 +81,6 @@ func doInstall(path, browser, extensionID string) error {
 	if err != nil {
 		return err
 	}
-	//fmt.Println(`Copying daemon`, daemonPath)
 	if _, err = io.Copy(out, in); err != nil {
 		return err
 	}
@@ -240,6 +240,7 @@ func install(developer bool) error {
 			path = s
 		}
 		if err := doInstall(path, s, extensionID); err != nil {
+			fmt.Println(`Failed installing the binary, ensure that your browser(s) are closed and that you have the required permissions.`)
 			return err
 		}
 	}
