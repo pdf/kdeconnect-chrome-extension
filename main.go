@@ -19,6 +19,7 @@ var (
 	installFlag   bool
 	developerFlag bool
 	versionFlag   bool
+	devicesFlag   bool
 )
 
 type message struct {
@@ -113,6 +114,7 @@ func init() {
 	flag.BoolVar(&installFlag, `install`, false, `Perform installation`)
 	flag.BoolVar(&developerFlag, `dev`, false, `Install as developer`)
 	flag.BoolVar(&versionFlag, `version`, false, `Display version`)
+	flag.BoolVar(&devicesFlag, `devices`, false, `Display visible devices`)
 	flag.Parse()
 
 	if devices, err = newDeviceList(); err != nil {
@@ -135,6 +137,13 @@ func main() {
 
 	if err := devices.getDevices(); err != nil {
 		log(err)
+	}
+
+	if devicesFlag {
+		for _, dev := range devices.devices {
+			fmt.Printf("- %s: %s (paired: %v; reachable: %v)\n", dev.Name, dev.ID, dev.IsTrusted, dev.IsReachable)
+		}
+		os.Exit(0)
 	}
 
 	go writePump(messageQueue)
