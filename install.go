@@ -73,7 +73,7 @@ func doInstall(path, browser, extensionID string) error {
 	}
 	out, err := os.OpenFile(daemonPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
 	defer func() {
-		if e := in.Close(); err == nil && e != nil {
+		if e := out.Close(); err == nil && e != nil {
 			fmt.Println(e)
 			panic(e)
 		}
