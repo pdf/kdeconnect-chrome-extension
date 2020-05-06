@@ -1,10 +1,10 @@
-hash: f2c54622a6eda01f9fbbe148c8ce535676da4a9f2567fcf8b1988808ec6d0ff9
-updated: 2017-02-01T14:46:21.698000446+11:00
+hash: 0c65b3581f4f0ed0f3c044adf385a0b4940c76ae4d628e797de54346e9eeb185
+updated: 2020-05-07T08:59:47.973819152+10:00
 imports:
 - name: github.com/buger/goterm
   version: cc3942e537b1ab00de92d348c40acbfa6565d20f
 - name: github.com/godbus/dbus
-  version: 5f6efc7ef2759c81b7ba876593971bfce311eab3
+  version: 37bf87eef99d69c4f1d3528bd66e3a87dc201472
   subpackages:
   - introspect
 - name: github.com/kardianos/osext
