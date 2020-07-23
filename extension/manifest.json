@@ -19,6 +19,13 @@
       "16": "images/kdeconnect-16.png"
     }
   },
+  "commands": {
+        "_execute_browser_action": {
+            "suggested_key": {
+                "default": "Alt+Shift+K"
+            }
+        }
+  },
   "options_ui": {
     "page": "options.html",
     "chrome_style": true
