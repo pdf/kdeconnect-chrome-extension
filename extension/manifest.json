@@ -20,11 +20,11 @@
     }
   },
   "commands": {
-        "_execute_browser_action": {
-            "suggested_key": {
-                "default": "Alt+c"
-            }
-        }
+    "_execute_browser_action": {
+      "suggested_key": {
+        "default": "Alt+c"
+      }
+    }
   },
   "options_ui": {
     "page": "options.html",
