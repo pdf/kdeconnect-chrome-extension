@@ -10,7 +10,8 @@ import (
 )
 
 const (
-	version = `0.1.3`
+	protocolVersion = `0.1.3`
+	cliVersion      = `0.1.5`
 )
 
 var (
@@ -70,7 +71,7 @@ func writePump(ch <-chan *message) {
 			out := &message{
 				Type: typeVersion,
 			}
-			if out.Data, err = json.Marshal(version); err != nil {
+			if out.Data, err = json.Marshal(protocolVersion); err != nil {
 				log(err)
 				continue
 			}
@@ -124,7 +125,7 @@ func init() {
 
 func main() {
 	if versionFlag {
-		fmt.Printf("kdeconnect-chrome-extension version %s, built with %s\n", version, runtime.Version())
+		fmt.Printf("kdeconnect-chrome-extension version %s, built with %s\n", cliVersion, runtime.Version())
 		os.Exit(0)
 	}
 

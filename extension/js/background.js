@@ -15,7 +15,7 @@ var badges = {};
 var red = [255, 0, 0, 220];
 var orange = [255, 129, 0, 220];
 var blue = [0, 116, 255, 220];
-var lastHostVersion = '0.1.3';
+var protocolVersion = '0.1.3';
 
 function logError(error) {
     // Suppress errors caused by Mozilla polyfill
@@ -278,15 +278,15 @@ function onPortMessage(msg) {
             });
             break;
         case 'typeVersion':
-            if (msg.data !== lastHostVersion) {
-                updatePending = lastHostVersion;
+            if (msg.data !== protocolVersion) {
+                updatePending = protocolVersion;
                 setBadge('update', '!', blue);
                 sendMessage({
                     type: 'typeStatus',
                     data: {
                         type: 'typeVersion',
                         key: 'update',
-                        update: lastHostVersion,
+                        update: protocolVersion,
                         current: msg.data,
                     }
                 });
