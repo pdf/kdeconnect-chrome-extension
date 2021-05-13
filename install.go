@@ -138,29 +138,40 @@ func install(developer bool) error {
 		operatingSystem = def
 	}
 
+	xdgConfigHome := os.Getenv(`XDG_CONFIG_HOME`)
+	if xdgConfigHome == `` {
+		xdgConfigHome = filepath.Join(u.HomeDir, `.config`)
+	}
+
 	installMappings = map[string]map[string]map[string]string{
 		def: {
 			def: {
 				def: filepath.Join(
-					u.HomeDir, `/.config/google-chrome/NativeMessagingHosts`,
+					xdgConfigHome, `google-chrome`, `NativeMessagingHosts`,
 				),
 				`root`: `/etc/opt/chrome/native-messaging-hosts`,
 			},
 			`vivaldi`: {
 				def: filepath.Join(
-					u.HomeDir, `/.config/vivaldi/NativeMessagingHosts`,
+					xdgConfigHome, `vivaldi`, `NativeMessagingHosts`,
 				),
 				`root`: `/etc/vivaldi/native-messaging-hosts`,
 			},
+			`brave`: {
+				def: filepath.Join(
+					xdgConfigHome, `BraveSoftware`, `Brave-Browser`, `NativeMessagingHosts`,
+				),
+				`root`: `/etc/chromium/native-messaging-hosts`,
+			},
 			`chromium`: {
 				def: filepath.Join(
-					u.HomeDir, `/.config/chromium/NativeMessagingHosts`,
+					xdgConfigHome, `chromium`, `NativeMessagingHosts`,
 				),
 				`root`: `/etc/chromium/native-messaging-hosts`,
 			},
 			`firefox`: {
 				def: filepath.Join(
-					u.HomeDir, `/.mozilla/native-messaging-hosts`,
+					u.HomeDir, `.mozilla`, `native-messaging-hosts`,
 				),
 				`root`: `/usr/lib/mozilla/native-messaging-hosts`,
 			},
@@ -168,25 +179,31 @@ func install(developer bool) error {
 		`darwin`: {
 			def: {
 				def: filepath.Join(
-					u.HomeDir, `/Library/Application Support/Google/Chrome/NativeMessagingHosts`,
+					u.HomeDir, `Library`, `Application Support`, `Google`, `Chrome`, `NativeMessagingHosts`,
 				),
 				`root`: `/Library/Google/Chrome/NativeMessagingHosts`,
 			},
 			`vivaldi`: {
 				def: filepath.Join(
-					u.HomeDir, `/Library/Application Support/Vivaldi/NativeMessagingHosts`,
+					u.HomeDir, `Library`, `Application Support`, `Vivaldi`, `NativeMessagingHosts`,
 				),
 				`root`: `/Library/Vivaldi/NativeMessagingHosts`,
 			},
+			`brave`: {
+				def: filepath.Join(
+					u.HomeDir, `Library`, `Application Support`, `Chromium`, `NativeMessagingHosts`,
+				),
+				`root`: `/Library/Application Support/Chromium/NativeMessagingHosts`,
+			},
 			`chromium`: {
 				def: filepath.Join(
-					u.HomeDir, `/Library/Application Support/Chromium/NativeMessagingHosts`,
+					u.HomeDir, `Library`, `Application Support`, `Chromium`, `NativeMessagingHosts`,
 				),
 				`root`: `/Library/Application Support/Chromium/NativeMessagingHosts`,
 			},
 			`firefox`: {
 				def: filepath.Join(
-					u.HomeDir, `/Library/Application Support/Mozilla/NativeMessagingHosts`,
+					u.HomeDir, `Library`, `Application Support`, `Mozilla`, `NativeMessagingHosts`,
 				),
 				`root`: `/Library/Application Support/Mozilla/NativeMessagingHosts`,
 			},
@@ -196,6 +213,7 @@ func install(developer bool) error {
 	menu := climenu.NewCheckboxMenu(`Browser Selection`, `Select browser(s) for native host installation (Space to select, Enter to confirm)`, `OK`, `Cancel`)
 	menu.AddMenuItem(`Chrome/Opera`, def)
 	menu.AddMenuItem(`Chromium`, `chromium`)
+	menu.AddMenuItem(`Brave`, `brave`)
 	menu.AddMenuItem(`Vivaldi`, `vivaldi`)
 	menu.AddMenuItem(`Firefox`, `firefox`)
 	menu.AddMenuItem(`Custom`, `custom`)
