@@ -125,7 +125,7 @@ func init() {
 
 func main() {
 	if versionFlag {
-		fmt.Printf("kdeconnect-chrome-extension version %s, built with %s\n", cliVersion, runtime.Version())
+		fmt.Printf("kdeconnect-chrome-extension version %s (protocol %s), built with %s\n", cliVersion, protocolVersion, runtime.Version())
 		os.Exit(0)
 	}
 
