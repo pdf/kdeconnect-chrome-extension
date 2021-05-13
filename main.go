@@ -11,7 +11,7 @@ import (
 
 const (
 	protocolVersion = `0.1.3`
-	cliVersion      = `0.1.5`
+	cliVersion      = `0.1.6`
 )
 
 var (
