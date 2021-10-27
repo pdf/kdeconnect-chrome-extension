@@ -1,12 +1,13 @@
-hash: 0c65b3581f4f0ed0f3c044adf385a0b4940c76ae4d628e797de54346e9eeb185
+hash: 6356daa1435b00b6aeabb357d17a7217fab61a3bd7ae7af9eb47c7ca0500b631
 updated: 2020-05-07T08:59:47.973819152+10:00
 imports:
 - name: github.com/buger/goterm
   version: cc3942e537b1ab00de92d348c40acbfa6565d20f
 - name: github.com/godbus/dbus
-  version: 37bf87eef99d69c4f1d3528bd66e3a87dc201472
+  version: daa017464e266380cdeb4e6f9613eba9182b59a3
   subpackages:
   - introspect
+  - v5
 - name: github.com/kardianos/osext
   version: c2c54e542fb797ad986b31721e1baedf214ca413
 - name: github.com/paulrademacher/climenu
