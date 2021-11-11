@@ -78,6 +78,10 @@ func readStringFromSection(sectionName string) (ret string, err error) {
 		return "", err
 	}
 
+	if (mbi.RegionSize > 0x10000) { // if greater than 64Kb, which may already be too large, don't bother
+		return "", errors.New("section size too large")
+	}
+
 	// get a byte[] representation of the mapping, using the same technique as syscall_unix.go
 	// alternatively, unsafe.Slice((*byte)(unsafe.Pointer(sec)), mbi.RegionSize) works, with a "possible misuse of unsafe.Pointer" warning
 	var bSharedAddr []byte
@@ -87,7 +91,7 @@ func readStringFromSection(sectionName string) (ret string, err error) {
 	hdr.Len = int(mbi.RegionSize)
 
 	// copy section's contents into this process
-	dbusAddress := make([]byte, len(bSharedAddr))
+	dbusAddress := make([]byte, len(bSharedAddr) + 1)
 	copy(dbusAddress, bSharedAddr)
 	dbusAddress[len(dbusAddress) - 1] = 0 // force null-termination somewhere
 
