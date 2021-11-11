@@ -104,12 +104,7 @@ func DBusSessionBusForPlatform() (conn *dbus.Conn, err error) {
 
 	var sectionName string = cachedDbusSectionName
 	if sectionName == "" {
-		// Prioritise Store-installed copies because it's more determinable
-		kdeConnectPath, err := KdeConnectPathFromWindowsStore()
-		if err != nil {
-			//fmt.Fprintln(os.Stderr, err)
-			kdeConnectPath, err = KdeConnectPathFromRunningIndicator()
-		}
+		kdeConnectPath, err := KdeConnectPathFromRunningIndicator()
 
 		if err != nil {
 			return nil, err
