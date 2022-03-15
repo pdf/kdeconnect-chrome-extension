@@ -136,9 +136,9 @@ function createContextMenus(devices) {
         }
         var keys = Object.keys(devs);
         var active = false;
-        keys.forEach(function (key) {
-            if (devs[key] !== null || devs[key] !== undefined) {
-                if (devs[key].isReachable && devs[key].isTrusted) {
+        keys.forEach(function (k) {
+            if (devs[k] !== null && devs[k] !== undefined) {
+                if (devs[k].isReachable && devs[k].isTrusted) {
                     active = true;
                     return;
                 }
@@ -170,11 +170,11 @@ function createContextMenus(devices) {
             title: 'KDE Connect',
             contexts: ['page', 'frame', 'link', 'image', 'video', 'audio'],
         });
-        Object.keys(devs).forEach(function (key) {
+        Object.keys(devs).forEach(function (k) {
             browser.contextMenus.create({
-                id: key,
-                title: devs[key].name,
-                enabled: devs[key].isReachable && devs[key].isTrusted,
+                id: k,
+                title: devs[k].name,
+                enabled: devs[k].isReachable && devs[k].isTrusted,
                 parentId: 'kdeconnectRoot',
                 contexts: ['page', 'frame', 'link', 'image', 'video', 'audio'],
                 onclick: contextMenuHandler,
