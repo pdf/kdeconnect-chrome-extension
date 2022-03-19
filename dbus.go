@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/godbus/dbus"
+	"github.com/godbus/dbus/v5"
 )
 
 const (
@@ -329,7 +329,7 @@ func logBadProp(id, prop string, err error) {
 }
 
 func newDevice(id string) (*Device, error) {
-	conn, err := dbus.SessionBus()
+	conn, err := DBusSessionBusForPlatform()
 	obj := conn.Object(dest, dbus.ObjectPath(fmt.Sprintf("%s/devices/%s", path, id)))
 	if err != nil {
 		return nil, err
@@ -352,7 +352,7 @@ func newDevice(id string) (*Device, error) {
 }
 
 func newDeviceList() (*deviceList, error) {
-	conn, err := dbus.SessionBus()
+	conn, err := DBusSessionBusForPlatform()
 	if err != nil {
 		return nil, err
 	}
